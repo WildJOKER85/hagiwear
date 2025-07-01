@@ -1,0 +1,28 @@
+:root {
+    /* Цвета */
+    --color-bg: #18181A;
+    --color-primary: #EE4D31;
+    --color-white: #FFFFFF;
+
+    /* Шрифт */
+    --font-family: 'Public Sans', sans-serif;
+
+    /* Размеры шрифта */
+    --font-xs: 0.75rem;
+    --font-sm: 0.875rem;
+    --font-md: 1rem;
+    --font-lg: 1.25rem;
+    --font-xl: 2rem;
+
+    /* Контейнер */
+    --container-max-width: 1200px;
+    --side-padding: 1rem;
+
+    /* Брейкпоинты */
+    --mobile-xs: 320px;
+    --mobile: 480px;
+    --tablet: 768px;
+    --laptop: 1024px;
+    --desktop: 1280px;
+    --desktop-xl: 1440px;
+}
