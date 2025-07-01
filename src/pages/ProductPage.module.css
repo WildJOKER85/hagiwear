@@ -1,0 +1,153 @@
+.wrapper {
+   background-color: var(--color-bg);
+   color: var(--color-white);
+   padding: 2rem 1rem;
+}
+
+.backBtn {
+   background: none;
+   border: none;
+   color: var(--color-primary);
+   font-size: var(--font-md);
+   cursor: pointer;
+   margin-bottom: 1rem;
+}
+
+.container {
+   display: flex;
+   flex-direction: column;
+   gap: 2rem;
+}
+
+.imageWrapper {
+   width: 100%;
+   max-width: 400px;
+   margin: 0 auto;
+}
+
+.image {
+   width: 100%;
+   object-fit: cover;
+   border-radius: 0.5rem;
+   transition: transform 0.3s ease;
+}
+
+.image:hover {
+   transform: scale(1.03);
+}
+
+.info {
+   max-width: 600px;
+   margin: 0 auto;
+}
+
+.price {
+   font-size: var(--font-lg);
+   margin: 1rem 0;
+   color: var(--color-primary);
+}
+
+.description {
+   font-size: var(--font-sm);
+   margin-bottom: 1rem;
+}
+
+.table {
+   width: 100%;
+   border-collapse: collapse;
+   margin-bottom: 1rem;
+}
+
+.table th,
+.table td {
+   border: 1px solid #fff3;
+   padding: 0.5rem;
+   text-align: center;
+}
+
+.sizeSelector {
+   display: flex;
+   gap: 0.5rem;
+   margin-bottom: 1rem;
+   flex-wrap: wrap;
+}
+
+.sizeBtn {
+   padding: 0.5rem 1rem;
+   border: 1px solid #fff6;
+   background: none;
+   color: white;
+   cursor: pointer;
+   border-radius: 4px;
+   transition: background 0.2s ease;
+}
+
+.sizeBtn:hover,
+.sizeBtn.active {
+   background: var(--color-primary);
+   color: white;
+   border-color: var(--color-primary);
+}
+
+.sizeInfo {
+   margin-bottom: 1rem;
+   font-size: var(--font-sm);
+}
+
+.clearBtn {
+   margin-top: 0.3rem;
+   font-size: var(--font-xs);
+   background: none;
+   border: none;
+   color: #ccc;
+   cursor: pointer;
+}
+
+.quantity {
+   display: flex;
+   align-items: center;
+   gap: 1rem;
+   margin: 1rem 0;
+}
+
+.quantity button {
+   padding: 0.5rem 1rem;
+   font-size: 1.2rem;
+   background: none;
+   color: white;
+   border: 1px solid #fff6;
+   cursor: pointer;
+   border-radius: 4px;
+}
+
+.addToCart {
+   background: var(--color-primary);
+   color: white;
+   padding: 0.75rem 1.5rem;
+   border: none;
+   border-radius: 8px;
+   cursor: pointer;
+   font-size: var(--font-md);
+   transition: background 0.3s ease;
+}
+
+.addToCart:hover {
+   background: #d23d24;
+}
+
+@media (min-width: 768px) {
+   .container {
+      flex-direction: row;
+      justify-content: center;
+      align-items: flex-start;
+   }
+
+   .imageWrapper,
+   .info {
+      flex: 1;
+   }
+
+   .imageWrapper {
+      max-width: 500px;
+   }
+}

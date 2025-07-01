@@ -1,13 +1,30 @@
+/* === Сброс стилей === */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+html,
 body {
+  height: 100%;
+  background-color: var(--color-bg);
+  /* тёмный фон везде */
+  color: var(--color-white);
+  /* белый текст по умолчанию */
+  font-family: var(--font-family);
   font-size: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+.main {
+  padding: 1rem;
+  min-height: calc(100vh - 100px);
+}
+
+/* === Адаптивный размер шрифта === */
 @media (min-width: 768px) {
   body {
     font-size: 1.1rem;
