@@ -11,6 +11,13 @@ const ProductPage = () => {
    const [quantity, setQuantity] = useState(1);
    const [selectedSize, setSelectedSize] = useState(null);
    const [stockStatus, setStockStatus] = useState(null);
+   const [isZoomed, setIsZoomed] = useState(false);
+   const [addedToCart, setAddedToCart] = useState(false);
+
+   const handleAddToCart = () => {
+      setAddedToCart(true);
+      setTimeout(() => setAddedToCart(false), 2500);
+   };
 
    if (!product) return <p style={{ color: 'white' }}>Ապրանքը չի գտնվել։</p>;
 
@@ -22,7 +29,13 @@ const ProductPage = () => {
 
          <div className={styles.container}>
             <div className={styles.imageWrapper}>
-               <img src={product.image} alt={product.name} className={styles.image} />
+               <img
+                  src={product.image}
+                  alt={product.name}
+                  className={`${styles.image} ${isZoomed ? styles.zoomed : ''}`}
+                  onClick={() => setIsZoomed(z => !z)}
+                  style={{ cursor: isZoomed ? 'zoom-out' : 'zoom-in' }}
+               />
             </div>
 
             <div className={styles.info}>
@@ -49,33 +62,36 @@ const ProductPage = () => {
                   </tbody>
                </table>
 
-               <div className={styles.sizeSelector}>
-                  {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map(size => (
-                     <button
-                        key={size}
-                        className={`${styles.sizeBtn} ${selectedSize === size ? styles.active : ''}`}
-                        onClick={() => {
-                           setSelectedSize(size);
-                           setStockStatus(size === 'M' ? 'Առկա չէ' : 'Առկա է');
-                        }}
-                     >
-                        {size}
-                     </button>
-                  ))}
-               </div>
-
-               {selectedSize && (
-                  <div className={styles.sizeInfo}>
-                     <p>Ճափսը՝ {selectedSize}</p>
-                     <p>Վիճակ՝ <strong>{stockStatus}</strong></p>
-                     <button onClick={() => {
-                        setSelectedSize(null);
-                        setStockStatus(null);
-                     }} className={styles.clearBtn}>
-                        Ջնջել ընտրությունը
-                     </button>
+               <div className={styles.sizeRow}>
+                  <div className={styles.sizeSelector}>
+                     {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map(size => (
+                        <button
+                           key={size}
+                           className={`${styles.sizeBtn} ${selectedSize === size ? styles.active : ''}`}
+                           onClick={() => {
+                              setSelectedSize(size);
+                              setStockStatus(size === 'M' ? 'Առկա չէ' : 'Առկա է');
+                           }}
+                        >
+                           {size}
+                        </button>
+                     ))}
                   </div>
-               )}
+                  <div className={styles.sizeInfo}>
+                     {selectedSize && (
+                        <>
+                           <p>Ճափսը՝ {selectedSize}</p>
+                           <p>Վիճակ՝ <strong>{stockStatus}</strong></p>
+                           <button onClick={() => {
+                              setSelectedSize(null);
+                              setStockStatus(null);
+                           }} className={styles.clearBtn}>
+                              Ջնջել ընտրությունը
+                           </button>
+                        </>
+                     )}
+                  </div>
+               </div>
 
                <div className={styles.quantity}>
                   <button onClick={() => setQuantity(q => Math.max(1, q - 1))}>−</button>
@@ -83,10 +99,18 @@ const ProductPage = () => {
                   <button onClick={() => setQuantity(q => q + 1)}>+</button>
                </div>
 
-               <button className={styles.addToCart}>Ավելացնել զամբյուղ</button>
+               <button className={styles.addToCart} onClick={handleAddToCart}>
+                  Ավելացնել զամբյուղ
+               </button>
             </div>
          </div>
-      </div>
+
+         {addedToCart && (
+            <div className={styles.cartNotification}>
+               ✅ Ավելացված է զամբյուղ
+            </div>
+         )}
+      </div >
    );
 };
 

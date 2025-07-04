@@ -21,8 +21,10 @@
 
 .imageWrapper {
    width: 100%;
-   max-width: 400px;
+   max-width: 350px;
    margin: 0 auto;
+   overflow: hidden;
+   position: relative;
 }
 
 .image {
@@ -30,10 +32,14 @@
    object-fit: cover;
    border-radius: 0.5rem;
    transition: transform 0.3s ease;
+   cursor: zoom-in;
 }
 
-.image:hover {
-   transform: scale(1.03);
+.zoomed {
+   transform: scale(1.5);
+   z-index: 10;
+   position: relative;
+   box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
 }
 
 .info {
@@ -52,19 +58,23 @@
    margin-bottom: 1rem;
 }
 
+/* Таблица размеров */
 .table {
    width: 100%;
    border-collapse: collapse;
    margin-bottom: 1rem;
+   font-size: var(--font-xs);
+   /* Сделали немного меньше */
 }
 
 .table th,
 .table td {
    border: 1px solid #fff3;
-   padding: 0.5rem;
+   padding: 0.3rem 0.4rem;
    text-align: center;
 }
 
+/* Выбор размера */
 .sizeSelector {
    display: flex;
    gap: 0.5rem;
@@ -103,6 +113,7 @@
    cursor: pointer;
 }
 
+/* Кол-во */
 .quantity {
    display: flex;
    align-items: center;
@@ -111,15 +122,30 @@
 }
 
 .quantity button {
-   padding: 0.5rem 1rem;
-   font-size: 1.2rem;
+   width: 40px;
+   height: 40px;
+   padding: 0;
+   font-size: 1.5rem;
    background: none;
    color: white;
    border: 1px solid #fff6;
    cursor: pointer;
-   border-radius: 4px;
+   border-radius: 8px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 
+.quantity span {
+   display: inline-flex;
+   justify-content: center;
+   align-items: center;
+   min-width: 32px;
+   font-size: 1.2rem;
+}
+
+/* Кнопка в корзину */
 .addToCart {
    background: var(--color-primary);
    color: white;
@@ -135,6 +161,96 @@
    background: #d23d24;
 }
 
+.sizeRow {
+   display: flex;
+   flex-direction: row;
+   align-items: flex-start;
+   gap: 1.5rem;
+   margin-bottom: 1rem;
+   width: 100%;
+}
+
+.sizeSelector {
+   display: flex;
+   gap: 0.5rem;
+   flex-wrap: wrap;
+   justify-content: flex-start;
+   flex: 1 1 0;
+   min-width: 0;
+}
+
+.sizeInfo {
+   min-width: 180px;
+   max-width: 220px;
+   min-height: 56px;
+   /* чуть больше, чтобы всегда было место */
+   font-size: var(--font-sm);
+   word-break: break-word;
+   flex-shrink: 0;
+   margin-bottom: 0;
+   display: flex;
+   flex-direction: column;
+   justify-content: flex-start;
+   align-items: flex-start;
+}
+
+@media (min-width: 600px) {
+   .sizeRow {
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 1.5rem;
+   }
+
+   .sizeSelector {
+      justify-content: flex-start;
+   }
+
+   .sizeInfo {
+      align-items: flex-start;
+      min-width: 180px;
+      max-width: 220px;
+      min-height: 48px;
+   }
+}
+
+.cartNotification {
+   position: fixed;
+   bottom: 2rem;
+   left: 50%;
+   transform: translateX(-50%);
+   background-color: #333;
+   color: white;
+   padding: 1rem 2rem;
+   border-radius: 10px;
+   font-size: var(--font-sm);
+   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+   z-index: 999;
+   animation: fadeInOut 2.5s ease;
+}
+
+@keyframes fadeInOut {
+   0% {
+      opacity: 0;
+      transform: translateX(-50%) translateY(20px);
+   }
+
+   10% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+   }
+
+   90% {
+      opacity: 1;
+   }
+
+   100% {
+      opacity: 0;
+      transform: translateX(-50%) translateY(20px);
+   }
+}
+
+/* Адаптация */
 @media (min-width: 768px) {
    .container {
       flex-direction: row;

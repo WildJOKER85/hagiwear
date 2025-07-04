@@ -1,7 +1,8 @@
+import { Link } from 'react-router-dom';
 import { useState } from 'react';
+import { IoHomeOutline } from 'react-icons/io5';
 import styles from './Header.module.css';
 import logo from '../../assets/logo-hagi.png';
-import { Link } from 'react-router-dom';
 
 const Header = () => {
    const [menuOpen, setMenuOpen] = useState(false);
@@ -13,6 +14,12 @@ const Header = () => {
                <div className={styles.left}>
                   <nav className={styles.nav}>
                      <ul className={styles.menuList}>
+                        <li>
+                           <Link to="/">
+                              <IoHomeOutline size={20} style={{ verticalAlign: 'middle', marginRight: '6px' }} />
+                              Գլխավոր
+                           </Link>
+                        </li>
                         <li><Link to="/catalog">Կատալոգ</Link></li>
                         <li><Link to="/about">Մեր մասին</Link></li>
                         <li><Link to="/contacts">Կապ</Link></li>
@@ -28,7 +35,7 @@ const Header = () => {
                </div>
 
                <div className={styles.logoWrapper}>
-                  <img src={logo} alt="Hagi Logo" className={styles.logo} />
+                  <img src={logo} alt="Hagi Logo" className={styles.logo} loading='lazy' />
                </div>
 
                <div className={styles.right}>
@@ -45,9 +52,16 @@ const Header = () => {
                <button
                   className={styles.closeBtn}
                   onClick={() => setMenuOpen(false)}
-               > ✕
+               >
+                  ✕
                </button>
                <ul className={styles.mobileMenuList}>
+                  <li>
+                     <Link to="/" onClick={() => setMenuOpen(false)}>
+                        <IoHomeOutline size={20} style={{ verticalAlign: 'middle', marginRight: '6px' }} />
+                        Գլխավոր
+                     </Link>
+                  </li>
                   <li><Link to="/catalog" onClick={() => setMenuOpen(false)}>Կատալոգ</Link></li>
                   <li><Link to="/about" onClick={() => setMenuOpen(false)}>Մեր մասին</Link></li>
                   <li><Link to="/contacts" onClick={() => setMenuOpen(false)}>Կապ</Link></li>
