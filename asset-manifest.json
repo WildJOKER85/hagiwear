@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/hagiwear/static/css/main.54d5728f.css",
-    "main.js": "/hagiwear/static/js/main.6f5a4c61.js",
+    "main.js": "/hagiwear/static/js/main.ea885b23.js",
     "static/media/hero.jpg": "/hagiwear/static/media/hero.13d35f8fbb2ea512a67c.jpg",
     "static/media/category-men.jpg": "/hagiwear/static/media/category-men.5ff03c26a65cfb522a49.jpg",
     "static/media/product-7.jpeg": "/hagiwear/static/media/product-7.2c58455b79aeca97941b.jpeg",
@@ -18,10 +18,10 @@
     "static/media/logo-hagi.png": "/hagiwear/static/media/logo-hagi.8cddd431ae5c858b201f.png",
     "index.html": "/hagiwear/index.html",
     "main.54d5728f.css.map": "/hagiwear/static/css/main.54d5728f.css.map",
-    "main.6f5a4c61.js.map": "/hagiwear/static/js/main.6f5a4c61.js.map"
+    "main.ea885b23.js.map": "/hagiwear/static/js/main.ea885b23.js.map"
   },
   "entrypoints": [
     "static/css/main.54d5728f.css",
-    "static/js/main.6f5a4c61.js"
+    "static/js/main.ea885b23.js"
   ]
 }
