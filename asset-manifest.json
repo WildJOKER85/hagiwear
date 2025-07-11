@@ -1,0 +1,27 @@
+{
+  "files": {
+    "main.css": "/hagiwear/static/css/main.54d5728f.css",
+    "main.js": "/hagiwear/static/js/main.6f5a4c61.js",
+    "static/media/hero.jpg": "/hagiwear/static/media/hero.13d35f8fbb2ea512a67c.jpg",
+    "static/media/category-men.jpg": "/hagiwear/static/media/category-men.5ff03c26a65cfb522a49.jpg",
+    "static/media/product-7.jpeg": "/hagiwear/static/media/product-7.2c58455b79aeca97941b.jpeg",
+    "static/media/product-3.jpeg": "/hagiwear/static/media/product-3.8a5bad86ad50163d6a56.jpeg",
+    "static/media/product-9.jpeg": "/hagiwear/static/media/product-9.cb381c0ff19fae8c5e82.jpeg",
+    "static/media/product-5.jpeg": "/hagiwear/static/media/product-5.531c89da7cb7e4aff873.jpeg",
+    "static/media/product-1.jpeg": "/hagiwear/static/media/product-1.94dbad964d4abed96476.jpeg",
+    "static/media/category-women.jpg": "/hagiwear/static/media/category-women.ad5a86765778231c402d.jpg",
+    "static/media/product-4.jpeg": "/hagiwear/static/media/product-4.929729152efae74d93af.jpeg",
+    "static/media/product-10.jpeg": "/hagiwear/static/media/product-10.a7e4fc76a414661cd565.jpeg",
+    "static/media/product-8.jpeg": "/hagiwear/static/media/product-8.46f67b31e97ac3eebdcc.jpeg",
+    "static/media/product-6.jpeg": "/hagiwear/static/media/product-6.4d2a568a3f277aa54ce3.jpeg",
+    "static/media/product-2.jpeg": "/hagiwear/static/media/product-2.6215d6d1892c845a64c3.jpeg",
+    "static/media/logo-hagi.png": "/hagiwear/static/media/logo-hagi.8cddd431ae5c858b201f.png",
+    "index.html": "/hagiwear/index.html",
+    "main.54d5728f.css.map": "/hagiwear/static/css/main.54d5728f.css.map",
+    "main.6f5a4c61.js.map": "/hagiwear/static/js/main.6f5a4c61.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.54d5728f.css",
+    "static/js/main.6f5a4c61.js"
+  ]
+}
