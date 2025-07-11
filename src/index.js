@@ -3,14 +3,17 @@ import './index.css';
 import './styles/theme.css';
 import App from './App';
 import { BrowserRouter } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import { store } from './store';
+import { AuthProvider } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
+
 root.render(
-  <Provider store={store}>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </Provider>
+  <BrowserRouter>
+    <AuthProvider>
+      <CartProvider>
+        <App />
+      </CartProvider>
+    </AuthProvider>
+  </BrowserRouter>
 );

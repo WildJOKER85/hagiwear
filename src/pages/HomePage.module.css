@@ -2,17 +2,17 @@
    display: flex;
    align-items: center;
    justify-content: center;
-   height: 83vh;
+   height: 85vh;
    background: url(../assets/hero.jpg) no-repeat center / cover;
    color: white;
    text-align: center;
    padding: 2rem;
    position: relative;
+   border-radius: 1rem;
 }
 
 .hero {
    background-color: rgba(0, 0, 0, 0.6);
-   /* затемнение */
    padding: 2rem;
    border-radius: 1rem;
 }
@@ -27,6 +27,14 @@
    margin-bottom: 2rem;
 }
 
+.heroButtons {
+   display: flex;
+   gap: 1rem;
+   justify-content: center;
+   margin-top: 1.5rem;
+   flex-wrap: wrap;
+}
+
 .ctaBtn {
    padding: 0.75rem 1.5rem;
    background-color: var(--color-primary);
@@ -37,10 +45,29 @@
    cursor: pointer;
    text-decoration: none;
    transition: background 0.3s ease;
+   min-width: 160px;
 }
 
 .ctaBtn:hover {
    background-color: #d23d24;
+}
+
+.secondaryBtn {
+   padding: 0.75rem 1.5rem;
+   background-color: transparent;
+   border: 2px solid var(--color-primary);
+   color: white;
+   border-radius: 8px;
+   font-size: var(--font-md);
+   cursor: pointer;
+   text-decoration: none;
+   transition: background 0.3s ease, color 0.3s ease;
+   min-width: 160px;
+}
+
+.secondaryBtn:hover {
+   background-color: var(--color-primary);
+   color: white;
 }
 
 .categories {
@@ -64,6 +91,11 @@
    object-position: top;
    display: block;
    border-radius: 1rem;
+   transition: transform 0.3s ease;
+}
+
+.category img:hover {
+   transform: scale(1.05);
 }
 
 .categoryBtn {
@@ -85,66 +117,58 @@
    background-color: var(--color-primary);
 }
 
-.heroButtons {
-   display: flex;
-   flex-direction: column;
-   align-items: center;
-   gap: 1rem;
-   margin-top: 2rem;
+/* Медиа-запросы для мобильных и планшетов */
+@media (max-width: 767px) {
+   .heroButtons {
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+   }
+
+   .ctaBtn,
+   .secondaryBtn {
+      width: 100%;
+      max-width: 320px;
+      min-width: 0;
+      font-size: 1rem;
+      box-sizing: border-box;
+      margin: 0;
+   }
+
+   .category img {
+      height: 260px;
+   }
 }
 
-.secondaryBtn {
-   padding: 0.75rem 1.5rem;
-   background-color: transparent;
-   border: 2px solid var(--color-primary);
-   color: white;
-   border-radius: 8px;
-   font-size: var(--font-md);
-   cursor: pointer;
-   text-decoration: none;
-   transition: background 0.3s ease, color 0.3s ease;
-}
-
-.secondaryBtn:hover {
-   background-color: var(--color-primary);
-   color: white;
-}
-
-
+/* Десктопные настройки */
 @media (min-width: 768px) {
-   .categories {
+   .heroButtons {
       flex-direction: row;
+      justify-content: center;
+      gap: 1.5rem;
+   }
+
+   .ctaBtn {
+      margin-right: 1rem;
+   }
+
+   .secondaryBtn {
+      margin-left: 1rem;
+   }
+
+   .categories {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
    }
 
    .category img {
       height: 400px;
    }
-}
 
-
-@media (min-width: 768px) {
    .hero h1 {
       font-size: 3rem;
    }
 
    .hero p {
       font-size: 1.25rem;
-   }
-}
-
-@media (min-width: 768px) {
-   .heroButtons {
-      flex-direction: row;
-      justify-content: center;
-   }
-
-   .ctaBtn {
-      margin-right: 1rem;
-      /* первая кнопка — чуть влево */
-   }
-
-   .secondaryBtn {
-      margin-left: 1rem;
-      /* вторая — чуть вправо */
    }
 }

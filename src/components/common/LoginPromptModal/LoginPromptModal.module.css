@@ -1,0 +1,56 @@
+.backdrop {
+   position: fixed;
+   inset: 0;
+   background-color: rgba(0, 0, 0, 0.6);
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   z-index: 1500;
+}
+
+.modal {
+   background: #222;
+   padding: 2rem;
+   border-radius: 8px;
+   max-width: 320px;
+   width: 90%;
+   color: white;
+   text-align: center;
+   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+}
+
+.buttons {
+   margin-top: 1.5rem;
+   display: flex;
+   justify-content: center;
+   gap: 1rem;
+}
+
+.loginBtn {
+   background-color: var(--color-primary);
+   border: none;
+   padding: 0.5rem 1.2rem;
+   border-radius: 6px;
+   color: white;
+   cursor: pointer;
+   font-weight: 600;
+   transition: background-color 0.3s ease;
+}
+
+.loginBtn:hover {
+   background-color: #c04b00;
+}
+
+.cancelBtn {
+   background: none;
+   border: 1px solid white;
+   padding: 0.5rem 1.2rem;
+   border-radius: 6px;
+   color: white;
+   cursor: pointer;
+   font-weight: 600;
+}
+
+.cancelBtn:hover {
+   background-color: rgba(255, 255, 255, 0.1);
+}

@@ -9,6 +9,24 @@
    margin-bottom: 2.5rem;
 }
 
+.searchResults {
+   text-align: center;
+   color: var(--color-white);
+   font-size: var(--font-md);
+   margin-bottom: 1rem;
+}
+
+.searchResults strong {
+   color: var(--color-primary);
+}
+
+.noResults {
+   text-align: center;
+   color: var(--color-white);
+   font-size: var(--font-md);
+   margin-top: 2rem;
+}
+
 .grid {
    display: grid;
    gap: 2rem;
@@ -54,7 +72,6 @@
    margin-bottom: 0.7rem;
    min-height: 40px;
    flex-grow: 1;
-   /* описание занимает всё свободное пространство */
 }
 
 .cardFooter {
@@ -63,7 +80,6 @@
    gap: 0.5rem;
    align-items: center;
    margin-top: auto;
-   /* прижимает футер к низу карточки */
 }
 
 .productPrice {
@@ -92,4 +108,84 @@
 .detailsBtn:hover {
    background-color: var(--color-primary);
    color: var(--color-white);
+}
+
+.searchForm {
+   display: flex;
+   gap: 0.5rem;
+   justify-content: center;
+   margin-bottom: 2rem;
+   flex-wrap: wrap;
+}
+
+.searchInput {
+   padding: 0.6rem 1rem;
+   font-size: 1rem;
+   border: 1px solid #555;
+   border-radius: 8px;
+   min-width: 400px;
+}
+
+.searchBtn {
+   padding: 0.6rem 1.2rem;
+   font-size: 1rem;
+   background-color: var(--color-primary);
+   color: white;
+   border: none;
+   border-radius: 8px;
+   cursor: pointer;
+   transition: background 0.3s ease;
+}
+
+.searchBtn:hover {
+   background-color: #f17144;
+}
+
+.clearBtn {
+   background: none;
+   border: none;
+   font-size: 1.4rem;
+   color: #aaa;
+   cursor: pointer;
+   padding: 0 0.5rem;
+   margin-left: -0.5rem;
+}
+
+.resultText {
+   text-align: center;
+   color: #ccc;
+   margin-bottom: 1.5rem;
+}
+
+.noResults {
+   text-align: center;
+   color: #bbb;
+   font-size: 1.1rem;
+   margin-top: 2rem;
+}
+
+@media (max-width: 600px) {
+   .searchForm {
+      flex-direction: column;
+      align-items: stretch;
+   }
+
+   .searchInput {
+      min-width: unset;
+      width: 100%;
+      font-size: 0.9rem;
+      padding: 0.5rem 0.8rem;
+   }
+
+   .searchBtn {
+      width: 100%;
+      font-size: 0.95rem;
+      padding: 0.5rem 0;
+   }
+
+   .clearBtn {
+      align-self: flex-end;
+      margin-top: 0.5rem;
+      font-size: 1.2rem;
+   }
 }

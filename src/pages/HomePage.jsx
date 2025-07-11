@@ -10,12 +10,14 @@ const HomePage = () => {
             <div className={styles.hero}>
                <h1>HAGIWEAR</h1>
                <p>Նոր անուն, նոր խոսք, նոր ձև</p>
-               <Link to="/catalog" className={styles.ctaBtn}>
-                  Դիտել հավաքածուն
-               </Link>
-               <Link to="/catalog?category=saryan" className={styles.secondaryBtn}>
-                  Սարյանի հավաքածու →
-               </Link>
+               <div className={styles.heroButtons}>
+                  <Link to="/catalog" className={styles.ctaBtn}>
+                     Դիտել հավաքածուն
+                  </Link>
+                  <Link to="/catalog?category=saryan" className={styles.secondaryBtn}>
+                     Սարյանի հավաքածու →
+                  </Link>
+               </div>
             </div>
          </section>
 

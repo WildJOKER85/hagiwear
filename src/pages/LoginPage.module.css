@@ -1,0 +1,109 @@
+.wrapper {
+  max-width: 400px;
+  margin: 4rem auto;
+  padding: 1.5rem;
+  background-color: #1e1e1e;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+  color: white;
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form input {
+  padding: 0.75rem;
+  border: 1px solid #444;
+  border-radius: 8px;
+  background-color: #2c2c2c;
+  color: white;
+  font-size: 1rem;
+  transition: border 0.2s, background-color 0.2s;
+}
+
+.form input:focus {
+  background-color: #353535;
+  border-color: #e63946;
+}
+
+.form button {
+  padding: 0.8rem;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--color-primary, #e63946);
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.form button:hover {
+  background-color: #c62828;
+}
+
+.error {
+  color: #ff6b6b;
+  font-size: 0.9rem;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.info {
+  background-color: #2f4f2f;
+  color: #b5fcb5;
+  font-size: 0.95rem;
+  text-align: center;
+  padding: 0.7rem;
+  margin-bottom: 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #3a773a;
+}
+
+.registerLink {
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.registerLink a {
+  color: var(--color-primary, #e63946);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.registerLink a:hover {
+  text-decoration: underline;
+}
+
+/* 💡 Медиа-запросы для адаптива */
+@media (max-width: 480px) {
+  .wrapper {
+    margin: 2rem 1rem;
+    padding: 1.5rem;
+  }
+
+  .title {
+    font-size: 1.3rem;
+  }
+
+  .form input,
+  .form button {
+    font-size: 0.95rem;
+  }
+
+  .registerLink {
+    font-size: 0.85rem;
+  }
+}
