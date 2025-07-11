@@ -9,7 +9,7 @@ import { CartProvider } from './context/CartContext';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
-  <BrowserRouter>
+  <BrowserRouter basename="/hagiwear">
     <AuthProvider>
       <CartProvider>
         <App />
