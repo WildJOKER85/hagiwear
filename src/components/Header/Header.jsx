@@ -3,6 +3,7 @@ import logo from '../../assets/logo-hagi.png';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { IoHomeOutline } from 'react-icons/io5';
+import { FiSearch } from 'react-icons/fi'; // Новая иконка поиска
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 
@@ -52,11 +53,13 @@ const Header = () => {
                </div>
 
                <div className={styles.right}>
-                  <button className={styles.iconBtn} onClick={handleSearchClick}>🔍</button>
+                  <button className={styles.iconBtn} onClick={handleSearchClick} aria-label="Search">
+                     <FiSearch size={20} />
+                  </button>
 
                   {isInCatalogOrProduct && (
                      <div className={styles.cartWrapper}>
-                        <Link to="/cart" className={styles.iconBtn}>🛒</Link>
+                        <Link to="/cart" className={styles.iconBtn} aria-label="Cart">🛒</Link>
                         {totalItems > 0 && (
                            <span className={styles.cartCount}>{totalItems}</span>
                         )}

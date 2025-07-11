@@ -19,10 +19,11 @@
    left: 50%;
    transform: translateX(-50%);
    width: max-content;
+   max-width: 180px;
 }
 
 .logo {
-   height: clamp(72px, 12vw, 160px);
+   height: clamp(60px, 10vw, 130px);
    object-fit: contain;
 }
 
@@ -266,38 +267,36 @@
    }
 }
 
-@media (max-width: 767px) {
-   .burgerBtn {
-      display: block;
+@media (max-width: 1024px) and (min-width: 768px) {
+   .container {
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto;
+      row-gap: 0.5rem;
+      align-items: center;
    }
 
-   .menuList {
-      display: none;
-   }
-
-   .right {
-      gap: 0.5rem;
-      position: absolute;
-      right: 1.5rem;
-      top: 1.2rem;
-      z-index: 10;
+   .left {
+      grid-row: 1;
       display: flex;
-      align-items: center;
-   }
-
-   .iconBtn {
-      font-size: 1.4rem;
-      padding: 0.3rem 0.6rem;
-      display: inline-flex;
-      align-items: center;
+      justify-content: center;
    }
 
    .logoWrapper {
+      grid-row: 2;
       position: static;
-      left: auto;
       transform: none;
-      margin: 0 auto;
       display: flex;
       justify-content: center;
+      max-width: 180px;
+   }
+
+   .menuList {
+      gap: 1.2rem;
+   }
+
+   .menuList li a {
+      font-size: 0.9rem;
+      /* чуть меньше */
    }
 }
