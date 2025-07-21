@@ -1,0 +1,276 @@
+.wrapper {
+   background-color: var(--color-bg);
+   color: var(--color-white);
+   padding: 2rem 1rem;
+   position: relative;
+}
+
+.backBtn {
+   background: none;
+   border: none;
+   color: var(--color-primary);
+   font-size: var(--font-md);
+   cursor: pointer;
+   margin-bottom: 1.5rem;
+   position: absolute;
+   z-index: 1000;
+}
+
+.container {
+   display: flex;
+   flex-direction: column;
+   gap: 2rem;
+}
+
+.imageSection {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   max-width: 600px;
+   margin-top: -60px;
+   position: relative;
+   z-index: 1;
+}
+
+.bigPhoto {
+   width: 100%;
+   max-width: 350px;
+   margin: 0 auto;
+   position: relative;
+   height: 400px;
+}
+
+.mainImage {
+   width: 100%;
+   border-radius: 10px;
+   margin-bottom: 0.5rem;
+   transition: transform 0.3s ease;
+   display: block;
+}
+
+.zoomed {
+   transform: scale(1.5);
+   position: relative;
+   z-index: 10;
+   box-shadow: none;
+   cursor: zoom-out;
+}
+
+.thumbnailRow {
+   display: flex;
+   gap: 0.5rem;
+   flex-wrap: wrap;
+   justify-content: center;
+   margin-top: 0.3rem;
+   position: relative;
+   z-index: 2;
+}
+
+
+.thumb {
+   width: 64px;
+   height: 64px;
+   object-fit: cover;
+   border-radius: 6px;
+   cursor: pointer;
+   opacity: 0.7;
+   border: 2px solid transparent;
+   transition: all 0.3s ease;
+}
+
+
+.thumb:hover,
+.activeThumb {
+   opacity: 1;
+   border-color: var(--color-primary);
+}
+
+.info {
+   max-width: 600px;
+   margin: 0 auto;
+}
+
+.price {
+   font-size: var(--font-lg);
+   margin: 1rem 0 0.5rem;
+   color: var(--color-primary);
+}
+
+.description {
+   font-size: var(--font-sm);
+   margin-bottom: 0.5rem;
+}
+
+.stock {
+   font-size: var(--font-sm);
+   margin-bottom: 1rem;
+}
+
+.selectSizeNote {
+   color: #ccc;
+   font-size: var(--font-sm);
+   margin-bottom: 1rem;
+}
+
+/* Размеры */
+.sizeRow {
+   display: flex;
+   flex-direction: row;
+   align-items: flex-start;
+   gap: 1.5rem;
+   margin-bottom: 1rem;
+   flex-wrap: wrap;
+}
+
+.sizeSelector {
+   display: flex;
+   gap: 0.5rem;
+   flex-wrap: wrap;
+   justify-content: flex-start;
+   flex: 1 1 0;
+   min-width: 0;
+}
+
+.sizeBtn {
+   padding: 0.5rem 1.1rem;
+   border: 1px solid #fff6;
+   background: none;
+   color: white;
+   cursor: pointer;
+   border-radius: 6px;
+   transition: background 0.2s ease;
+   font-size: 0.9rem;
+}
+
+.sizeBtn:hover,
+.sizeBtn.active {
+   background: var(--color-primary);
+   border-color: var(--color-primary);
+}
+
+.sizeBtn:disabled {
+   opacity: 0.4;
+   cursor: not-allowed;
+}
+
+.sizeInfo {
+   min-width: 160px;
+   max-width: 240px;
+   font-size: var(--font-sm);
+   display: flex;
+   flex-direction: column;
+   justify-content: flex-start;
+   gap: 0.2rem;
+}
+
+.clearBtn {
+   margin-top: 0.3rem;
+   font-size: var(--font-xs);
+   background: none;
+   border: none;
+   color: #ccc;
+   cursor: pointer;
+   padding: 0;
+}
+
+/* Кол-во */
+.quantity {
+   display: flex;
+   align-items: center;
+   gap: 1rem;
+   margin: 1rem 0;
+}
+
+.quantity button {
+   width: 40px;
+   height: 40px;
+   padding: 0;
+   font-size: 1.5rem;
+   background: none;
+   color: white;
+   border: 1px solid #fff6;
+   cursor: pointer;
+   border-radius: 8px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.quantity span {
+   display: inline-flex;
+   justify-content: center;
+   align-items: center;
+   min-width: 32px;
+   font-size: 1.2rem;
+}
+
+/* Кнопка в корзину */
+.addToCart {
+   background: var(--color-primary);
+   color: white;
+   padding: 0.75rem 1.5rem;
+   border: none;
+   border-radius: 8px;
+   cursor: pointer;
+   font-size: var(--font-md);
+   transition: background 0.3s ease;
+}
+
+.addToCart:hover {
+   background: #d23d24;
+}
+
+/* Уведомление */
+.cartNotification {
+   position: fixed;
+   bottom: 2rem;
+   left: 50%;
+   transform: translateX(-50%);
+   background-color: #333;
+   color: white;
+   padding: 1rem 2rem;
+   border-radius: 10px;
+   font-size: var(--font-sm);
+   z-index: 999;
+   animation: fadeInOut 2.5s ease;
+}
+
+@keyframes fadeInOut {
+   0% {
+      opacity: 0;
+      transform: translateX(-50%) translateY(20px);
+   }
+
+   10% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+   }
+
+   90% {
+      opacity: 1;
+   }
+
+   100% {
+      opacity: 0;
+      transform: translateX(-50%) translateY(20px);
+   }
+}
+
+/* Адаптация */
+@media (min-width: 768px) {
+   .container {
+      flex-direction: row;
+      justify-content: center;
+      align-items: flex-start;
+   }
+
+   .imageSection,
+   .info {
+      flex: 1;
+   }
+
+   .mainImage {
+      max-width: 500px;
+   }
+}

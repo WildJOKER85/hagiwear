@@ -1,0 +1,136 @@
+/* === Контейнер карточек === */
+.grid {
+   display: grid;
+   gap: 2rem;
+   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+   max-width: 100%;
+   margin: 0 auto;
+   justify-items: center;
+}
+
+/* === Стили отдельной карточки === */
+.card {
+   background-color: #2a2a2a;
+   border-radius: 10px;
+   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+   overflow: hidden;
+   display: flex;
+   flex-direction: column;
+   transition: transform 0.3s ease;
+}
+
+.card:hover {
+   transform: translateY(-5px);
+}
+
+.unavailable {
+   opacity: 0.5;
+   pointer-events: none;
+}
+
+.imageWrapper {
+   position: relative;
+   display: block;
+   overflow: hidden;
+   border-bottom: 1px solid #444;
+}
+
+.imageWrapper img {
+   width: 100%;
+   height: auto;
+   display: block;
+   object-fit: cover;
+   transition: transform 0.3s ease;
+}
+
+.imageWrapper:hover img {
+   transform: scale(1.05);
+}
+
+.outOfStock {
+   position: absolute;
+   top: 8px;
+   left: 8px;
+   background-color: #c62828;
+   color: var(--color-white);
+   padding: 4px 8px;
+   border-radius: 6px;
+   font-weight: bold;
+   font-size: var(--font-sm);
+   user-select: none;
+   pointer-events: none;
+   box-shadow: 0 0 5px rgba(198, 40, 40, 0.8);
+}
+
+.details {
+   padding: 1rem;
+   display: flex;
+   flex-direction: column;
+   gap: 0.5rem;
+   flex-grow: 1;
+}
+
+.name {
+   font-size: var(--font-md);
+   font-weight: 600;
+   color: var(--color-white);
+   margin: 0;
+}
+
+.price {
+   font-size: var(--font-md);
+   color: var(--color-primary);
+   margin: 0;
+}
+
+.description {
+   font-size: var(--font-sm);
+   color: #aaa;
+   flex-grow: 1;
+}
+
+.detailsBtn {
+   margin-top: auto;
+   align-self: flex-start;
+   text-decoration: none;
+   background-color: var(--color-primary);
+   color: var(--color-white);
+   padding: 0.5rem 1rem;
+   border-radius: 6px;
+   font-weight: 600;
+   font-size: var(--font-sm);
+   transition: background-color 0.3s ease;
+}
+
+.detailsBtn:hover {
+   background-color: #c84e2f;
+}
+
+/* === Адаптивность === */
+@media (max-width: 1024px) {
+   .grid {
+      gap: 1.5rem;
+      padding: 1.5rem 1rem;
+   }
+
+   .card {
+      border-radius: 8px;
+   }
+
+   .name {
+      font-size: var(--font-sm);
+   }
+
+   .price {
+      font-size: var(--font-sm);
+   }
+
+   .description {
+      font-size: var(--font-xs);
+   }
+
+   .detailsBtn {
+      padding: 0.4rem 0.8rem;
+      font-size: var(--font-xs);
+   }
+}

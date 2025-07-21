@@ -1,0 +1,42 @@
+/* === Сброс стилей === */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  background-color: var(--color-bg);
+  color: var(--color-white);
+  font-family: var(--font-family);
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  overflow-x: hidden;
+}
+
+.main {
+  min-height: calc(100vh - 100px);
+}
+
+/* === Адаптивный размер шрифта === */
+@media (min-width: 768px) {
+  body {
+    font-size: 1.1rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  body {
+    font-size: 1.2rem;
+  }
+}

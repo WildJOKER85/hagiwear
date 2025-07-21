@@ -1,0 +1,34 @@
+:root {
+    /* Цвета */
+    --color-bg: #18181A;
+    --color-primary: #EE4D31;
+    --color-white: #FFFFFF;
+
+    /* Шрифт */
+    --font-family: 'Public Sans', sans-serif;
+
+    /* Размеры шрифта */
+    --font-xs: 0.75rem;
+    --font-sm: 0.875rem;
+    --font-md: 1rem;
+    --font-lg: 1.25rem;
+    --font-xl: 2rem;
+
+    /* Контейнер */
+    --container-max-width: 1200px;
+    --side-padding: 1rem;
+
+    /* Брейкпоинты */
+    --mobile-xs: 320px;
+    --mobile: 480px;
+    --tablet: 768px;
+    --laptop: 1024px;
+    --desktop: 1280px;
+    --desktop-xl: 1440px;
+    --desktop-2xl: 1680px;
+    --desktop-3xl: 1920px;
+    --desktop-4xl: 2560px;
+    --desktop-5xl: 3200px;
+    --desktop-6xl: 3840px;
+    --desktop-7xl: 4096px;
+}

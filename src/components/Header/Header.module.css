@@ -1,0 +1,237 @@
+/* === Header.module.css === */
+
+.header {
+   background-color: var(--color-bg);
+   padding: 1rem 0;
+}
+
+.container {
+   position: relative;
+   max-width: var(--container-max-width);
+   margin: 0 auto;
+   padding: 0 var(--side-padding);
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   z-index: 1000;
+}
+
+.logoWrapper {
+   position: absolute;
+   left: 50%;
+   transform: translateX(-50%);
+   width: max-content;
+   max-width: 180px;
+}
+
+.logo {
+   height: clamp(60px, 10vw, 130px);
+   object-fit: contain;
+}
+
+.menuList {
+   display: flex;
+   gap: 2rem;
+   list-style: none;
+}
+
+.menuList li a {
+   text-decoration: none;
+   color: var(--color-white);
+   font-size: var(--font-md);
+   letter-spacing: 0.03em;
+   transition: color 0.3s ease;
+}
+
+.menuList li a:hover {
+   color: var(--color-primary);
+}
+
+.left {
+   display: flex;
+   gap: 2rem;
+   align-items: center;
+}
+
+.right {
+   display: flex;
+   gap: 1.5rem;
+   align-items: center;
+}
+
+.iconBtn {
+   background: none;
+   border: none;
+   color: var(--color-white);
+   font-size: 1.2rem;
+   cursor: pointer;
+   transition: color 0.3s ease;
+   font-family: inherit;
+   text-decoration: none;
+   position: relative;
+}
+
+.iconBtn:hover {
+   color: var(--color-primary);
+}
+
+.burgerBtn {
+   background: none;
+   border: none;
+   font-size: 1.6rem;
+   color: var(--color-white);
+   cursor: pointer;
+   display: none;
+}
+
+@media (max-width: 768px) {
+   .burgerBtn {
+      display: block;
+   }
+
+   .menuList {
+      display: none;
+   }
+}
+
+.mobileMenu {
+   position: fixed;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100vh;
+   background-color: rgba(24, 24, 26, 0.95);
+   z-index: 1000;
+   display: flex;
+   flex-direction: column;
+   padding: 2rem 1.5rem;
+   animation: fadeIn 0.3s ease-in-out;
+}
+
+.closeBtn {
+   align-self: flex-end;
+   background: none;
+   border: none;
+   font-size: 2rem;
+   color: var(--color-white);
+   cursor: pointer;
+   margin-bottom: 2rem;
+}
+
+.mobileMenuList {
+   list-style: none;
+   display: flex;
+   flex-direction: column;
+   gap: 1.5rem;
+   font-size: var(--font-lg);
+}
+
+.mobileMenuList li a {
+   text-decoration: none;
+   color: var(--color-white);
+   font-weight: 500;
+   letter-spacing: 0.03em;
+   transition: color 0.3s ease;
+}
+
+.mobileMenuList li a:hover {
+   color: var(--color-primary);
+}
+
+.cartWrapper {
+   position: relative;
+   display: inline-block;
+}
+
+.cartCount {
+   position: absolute;
+   top: -6px;
+   right: -10px;
+   background-color: #00d15f;
+   color: white;
+   font-size: 0.7rem;
+   padding: 2px 6px;
+   border-radius: 999px;
+   font-weight: bold;
+   min-width: 18px;
+   text-align: center;
+}
+
+.userBox {
+   display: flex;
+   align-items: center;
+   gap: 0.7rem;
+   background-color: #2a2a2a;
+   padding: 0.4rem 0.9rem;
+   border-radius: 999px;
+   border: 1px solid #444;
+}
+
+.email {
+   font-size: 0.85rem;
+   color: #fff;
+   max-width: 140px;
+   overflow: hidden;
+   text-overflow: ellipsis;
+   white-space: nowrap;
+}
+
+.logoutBtn {
+   background: none;
+   border: none;
+   color: #f66;
+   font-size: 1rem;
+   cursor: pointer;
+   transition: color 0.3s ease;
+   padding: 0 0.2rem;
+}
+
+.logoutBtn:hover {
+   color: #ff9999;
+   background: transparent;
+}
+
+@keyframes fadeIn {
+   from {
+      opacity: 0;
+      transform: translateY(-20px);
+   }
+
+   to {
+      opacity: 1;
+      transform: translateY(0);
+   }
+}
+
+@media (max-width: 1024px) and (min-width: 768px) {
+   .container {
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto;
+      row-gap: 0.5rem;
+      align-items: center;
+   }
+
+   .left {
+      grid-row: 1;
+      display: flex;
+      justify-content: center;
+   }
+
+   .logoWrapper {
+      grid-row: 2;
+      position: static;
+      transform: none;
+      display: flex;
+      justify-content: center;
+      max-width: 180px;
+   }
+
+   .menuList {
+      gap: 1.2rem;
+   }
+
+   .menuList li a {
+      font-size: 0.9rem;
+   }
+}
