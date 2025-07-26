@@ -22,9 +22,6 @@ const Header = () => {
    const user = useSelector(selectUser);
    const isLoggedIn = useSelector(selectIsLoggedIn);
 
-   const isInCatalogOrProduct =
-      location.pathname.startsWith('/catalog') || location.pathname.startsWith('/product');
-
    const handleSearchClick = () => {
       if (location.pathname.includes('catalog')) {
          const input = document.getElementById('searchInput');
@@ -86,14 +83,13 @@ const Header = () => {
                      <FiSearch size={20} />
                   </button>
 
-                  {isInCatalogOrProduct && (
-                     <div className={styles.cartWrapper}>
-                        <Link to="/cart" className={styles.iconBtn} aria-label="Cart">🛒</Link>
-                        {totalItems > 0 && (
-                           <span className={styles.cartCount}>{totalItems}</span>
-                        )}
-                     </div>
-                  )}
+                  {/* Показываем корзину всегда */}
+                  <div className={styles.cartWrapper}>
+                     <Link to="/cart" className={styles.iconBtn} aria-label="Cart">🛒</Link>
+                     {totalItems > 0 && (
+                        <span className={styles.cartCount}>{totalItems}</span>
+                     )}
+                  </div>
 
                   {!isLoggedIn ? (
                      <Link to="/login" className={styles.iconBtn}>Մուտք</Link>

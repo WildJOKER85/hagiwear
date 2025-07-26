@@ -100,4 +100,11 @@ const cartSlice = createSlice({
 
 export const { addToCart, removeFromCart, clearCart, setCart } = cartSlice.actions;
 export const selectCartItems = (state) => state.cart.items;
+export const selectCartTotalPrice = (state) => {
+   let totalPrice = 0;
+   state.cart.items.forEach(element => {
+      totalPrice += element.price;
+   });
+   return totalPrice;
+};
 export default cartSlice.reducer;

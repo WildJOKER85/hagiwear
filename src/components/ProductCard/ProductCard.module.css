@@ -106,6 +106,38 @@
    background-color: #c84e2f;
 }
 
+.discountBadge {
+   position: absolute;
+   top: 10px;
+   left: 10px;
+   background-color: #27ae60;
+   color: white;
+   font-size: 0.9rem;
+   font-weight: bold;
+   padding: 4px 8px;
+   border-radius: 8px;
+   z-index: 2;
+}
+
+.priceBlock {
+   display: flex;
+   align-items: center;
+   gap: 0.5rem;
+   margin-bottom: 0.5rem;
+}
+
+.oldPrice {
+   text-decoration: line-through;
+   color: #999;
+   font-size: var(--font-sm);
+}
+
+.newPrice {
+   font-size: var(--font-md);
+   font-weight: 600;
+   color: var(--color-primary);
+}
+
 /* === Адаптивность === */
 @media (max-width: 1024px) {
    .grid {

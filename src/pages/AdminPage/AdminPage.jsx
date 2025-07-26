@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import styles from './AdminPage.module.css';
 
 const API_URL = 'http://localhost:10000/api/products';
@@ -10,28 +10,36 @@ const AdminPage = () => {
       name: '',
       description: '',
       price: '',
-      stock: 0,
+      stock: '',
+      discount: '',
+      colors: '',
+      sizes: '',
    });
    const [isEditing, setIsEditing] = useState(false);
+   const fileInputRef = useRef(null);
 
-   // Загрузка товаров с принудительным отключением кеша
    const loadProducts = () => {
       fetch(`${API_URL}?t=${Date.now()}`)
          .then((res) => {
-            if (!res.ok) throw new Error(`Ошибка: ${res.status}`);
+            if (!res.ok) throw new Error(`Սխալ: ${res.status}`);
             return res.json();
          })
          .then((data) => {
-            // Приводим price и stock к числам
+            console.log(data);
             const processed = data.map((item) => ({
                ...item,
                price: Number(item.price),
                stock: Number(item.stock),
+               discount: Number(item.discount),
+               colors: item.colors || '',
+               sizes: item.sizes || '',
             }));
-            console.log('Товары с сервера (приведенные к числам):', processed);
             setProducts(processed);
          })
-         .catch((err) => console.error('Ошибка загрузки:', err));
+         .catch((err) => {
+            console.error('Սխալ բեռնման ժամանակ:', err);
+            alert('Անհաջող բեռնում՝ փորձեք կրկին');
+         });
    };
 
    useEffect(() => {
@@ -42,19 +50,42 @@ const AdminPage = () => {
       const { name, value } = e.target;
       setFormData((prev) => ({
          ...prev,
-         [name]: name === 'price' || name === 'stock' ? (value === '' ? '' : Number(value)) : value,
+         [name]:
+            name === 'price' || name === 'stock' || name === 'discount'
+               ? value === ''
+                  ? ''
+                  : Number(value)
+               : value,
       }));
    };
 
    const handleSubmit = async (e) => {
       e.preventDefault();
 
-      const dataToSend = {
-         name: formData.name.trim(),
-         description: formData.description.trim(),
-         price: Number(formData.price) || 0,
-         stock: Number(formData.stock) || 0,
-      };
+      if (!formData.name.trim()) {
+         alert('Անունը պարտադիր է');
+         return;
+      }
+      if (formData.price === '' || isNaN(formData.price)) {
+         alert('Գինը պարտադիր է և պետք է լինի թիվ');
+         return;
+      }
+
+      const form = new FormData();
+      form.append('name', formData.name.trim());
+      form.append('description', formData.description.trim());
+      form.append('price', formData.price);
+      form.append('stock', formData.stock || 0);
+      form.append('discount', formData.discount || 0);
+      form.append('colors', formData.colors.trim());
+      form.append('sizes', formData.sizes.trim());
+
+      const files = fileInputRef.current?.files;
+      if (files?.length > 0) {
+         for (const file of files) {
+            form.append('images', file);
+         }
+      }
 
       const url = isEditing ? `${API_URL}/${formData.id}` : API_URL;
       const method = isEditing ? 'PUT' : 'POST';
@@ -62,24 +93,27 @@ const AdminPage = () => {
       try {
          const res = await fetch(url, {
             method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dataToSend),
+            body: form,
          });
 
-         if (!res.ok) throw new Error(`Ошибка: ${res.status}`);
+         if (!res.ok) throw new Error(`Սխալ: ${res.status}`);
 
-         const responseData = await res.json();
-         console.log('Ответ сервера при обновлении/добавлении:', responseData);
-
-         // Заново загружаем товары
          await loadProducts();
-
-         // Сбрасываем форму
-         setFormData({ id: null, name: '', description: '', price: '', stock: 0 });
+         setFormData({
+            id: null,
+            name: '',
+            description: '',
+            price: '',
+            stock: '',
+            discount: '',
+            colors: '',
+            sizes: '',
+         });
+         if (fileInputRef.current) fileInputRef.current.value = '';
          setIsEditing(false);
       } catch (error) {
-         console.error('Ошибка отправки данных:', error);
-         alert('Ошибка при сохранении товара');
+         console.error('Սխալ ապրանքի պահպանման ժամանակ:', error);
+         alert('Սխալ ապրանքի պահպանման ժամանակ');
       }
    };
 
@@ -90,68 +124,99 @@ const AdminPage = () => {
          description: product.description || '',
          price: product.price,
          stock: product.stock,
+         discount: product.discount,
+         colors: product.colors,
+         sizes: product.sizes,
       });
       setIsEditing(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
    };
 
    const handleDelete = async (id) => {
-      if (!window.confirm('Удалить этот товар?')) return;
-
+      if (!window.confirm('Ջնջե՞լ այս ապրանքը։')) return;
       try {
          const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-         if (!res.ok) throw new Error(`Ошибка: ${res.status}`);
-
+         if (res.status === 404) {
+            alert('Այս ապրանքը արդեն գոյություն չունի');
+         } else if (!res.ok) {
+            throw new Error(`Սխալ: ${res.status}`);
+         }
          await loadProducts();
       } catch (error) {
-         console.error('Ошибка удаления товара:', error);
-         alert('Ошибка при удалении товара');
+         console.error('Ապրանքի ջնջման սխալ:', error);
+         alert('Սխալ ապրանքի ջնջման ժամանակ');
       }
    };
 
-   console.log('Текущий стейт products:', products);
-
    return (
       <div className={styles.container}>
-         <h2>{isEditing ? 'Редактировать товар' : 'Добавить товар'}</h2>
+         <h2>{isEditing ? 'Խմբագրել ապրանքը' : 'Ավելացնել ապրանք'}</h2>
          <form className={styles.form} onSubmit={handleSubmit}>
             <input
                name="name"
-               placeholder="Название"
+               placeholder="Անուն"
                value={formData.name}
                onChange={handleChange}
                required
             />
             <input
                name="description"
-               placeholder="Описание"
+               placeholder="Նկարագիր"
                value={formData.description}
                onChange={handleChange}
             />
             <input
                name="price"
-               placeholder="Цена"
+               placeholder="Գին"
                value={formData.price}
                onChange={handleChange}
                type="number"
                min="0"
-               step="0.01"
                required
             />
             <input
                name="stock"
-               placeholder="Количество на складе"
+               placeholder="Պահեստի քանակ"
                value={formData.stock}
                onChange={handleChange}
                type="number"
                min="0"
             />
-            <button type="submit">{isEditing ? 'Сохранить' : 'Добавить'}</button>
+            <input
+               name="discount"
+               placeholder="Զեղչ (%)"
+               value={formData.discount}
+               onChange={handleChange}
+               type="number"
+               min="0"
+               max="100"
+            />
+            <input
+               name="colors"
+               placeholder="Գույներ (բաժանված ստորակետով)"
+               value={formData.colors}
+               onChange={handleChange}
+            />
+            <input
+               name="sizes"
+               placeholder="Չափսեր (բաժանված ստորակետով, օրինակ XS,S,M)"
+               value={formData.sizes}
+               onChange={handleChange}
+            />
+            <input
+               type="file"
+               ref={fileInputRef}
+               accept="image/*"
+               multiple
+            />
+            <button type="submit">
+               {isEditing ? 'Պահպանել' : 'Ավելացնել'}
+            </button>
          </form>
 
          <div className={styles.list}>
             {products.length === 0 ? (
-               <p>Товары отсутствуют</p>
+               <p>Ապրանքներ չկան</p>
             ) : (
                products.map((product) => (
                   <div key={product.id} className={styles.card}>
@@ -165,12 +230,39 @@ const AdminPage = () => {
                      <div className={styles.info}>
                         <h4>{product.name}</h4>
                         <p>{product.description}</p>
-                        <strong>{product.price} ֏</strong>
-                        <p>В наличии: {product.stock}</p>
+                        <strong>
+                           Գին:{' '}
+                           {product.discount > 0 ? (
+                              <>
+                                 <span
+                                    style={{
+                                       textDecoration: 'line-through',
+                                       color: '#888',
+                                       marginRight: '8px',
+                                    }}
+                                 >
+                                    {product.price} ֏
+                                 </span>
+                                 <span style={{ color: '#EE4D31' }}>
+                                    {Math.round(product.price * (1 - product.discount / 100))} ֏
+                                 </span>
+                              </>
+                           ) : (
+                              `${product.price} ֏`
+                           )}
+                        </strong>
+                        <p>Զեղչ: {product.discount}%</p>
+                        <p>Պահեստում է: {product.stock}</p>
+                        <p>Գույներ: {product.colors || '-'}</p>
+                        <p>Չափսեր: {product.sizes || '-'}</p>
                      </div>
                      <div className={styles.actions}>
-                        <button onClick={() => handleEdit(product)}>✏️</button>
-                        <button onClick={() => handleDelete(product.id)}>🗑️</button>
+                        <button onClick={() => handleEdit(product)} title="Խմբագրել">
+                           ✏️
+                        </button>
+                        <button onClick={() => handleDelete(product.id)} title="Ջնջել">
+                           🗑️
+                        </button>
                      </div>
                   </div>
                ))

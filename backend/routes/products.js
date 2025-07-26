@@ -1,181 +1,217 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
-// Получить товар по ID с main_image и размерами (если есть)
-router.get('/:id', async (req, res) => {
-   const { id } = req.params;
-   try {
-      const hostUrl = req.hostUrl;
-
-      const [productRows] = await db.query(
-         `SELECT 
-         p.id, p.name, p.description, p.price, p.stock, p.created_at,
-         (
-           SELECT CONCAT(?, pi.image_url)
-           FROM product_images pi
-           WHERE pi.product_id = p.id AND pi.image_url LIKE '%main.jpg'
-           LIMIT 1
-         ) AS main_image
-       FROM products p
-       WHERE p.id = ?`,
-         [hostUrl, id]
-      );
-
-      if (productRows.length === 0) {
-         return res.status(404).json({ message: 'Товар не найден' });
-      }
-
-      const product = productRows[0];
-
-      const [sizeRows] = await db.query(
-         `SELECT size, quantity FROM product_sizes WHERE product_id = ?`,
-         [id]
-      );
-
-      const sizes = {};
-      sizeRows.forEach(({ size, quantity }) => {
-         sizes[size] = quantity;
-      });
-
-      product.sizes = sizes;
-
-      res.json(product);
-   } catch (error) {
-      console.error('Ошибка получения товара:', error);
-      res.status(500).json({ message: 'Ошибка сервера при получении товара' });
-   }
+// Настройка multer для загрузки изображений в папку /images/products
+const storage = multer.diskStorage({
+   destination: (req, file, cb) => {
+      const dir = path.join(__dirname, '..', 'images', 'products');
+      fs.mkdirSync(dir, { recursive: true });
+      cb(null, dir);
+   },
+   filename: (req, file, cb) => {
+      const uniqueName = `product-${Date.now()}-${Math.round(Math.random() * 1000)}${path.extname(file.originalname)}`;
+      cb(null, uniqueName);
+   },
 });
 
-// Получить все товары с main_image
+const upload = multer({ storage });
+
+// GET /api/products — получить все товары с main_image
 router.get('/', async (req, res) => {
    try {
-      const hostUrl = req.hostUrl;
+      const hostUrl = req.hostUrl || 'http://localhost:10000';
 
       const [rows] = await db.query(
          `SELECT 
-         p.id, p.name, p.description, p.price, p.stock, p.created_at,
-         (
-           SELECT CONCAT(?, pi.image_url) 
-           FROM product_images pi 
-           WHERE pi.product_id = p.id AND pi.image_url LIKE '%main.jpg' 
-           LIMIT 1
-         ) AS main_image
-       FROM products p
-       ORDER BY p.created_at DESC`,
+            p.id, p.name, p.description, p.price, p.stock,
+            p.discount, p.colors, p.sizes, p.created_at,
+            (
+               SELECT CONCAT(?, pi.image_url)
+               FROM product_images pi
+               WHERE pi.product_id = p.id AND pi.image_url LIKE '%main%'
+               LIMIT 1
+            ) AS main_image
+         FROM products p
+         ORDER BY p.created_at DESC`,
          [hostUrl]
       );
+
       res.json(rows);
    } catch (error) {
       console.error('Ошибка получения товаров:', error);
-      res.status(500).json({ message: 'Ошибка сервера при получении товаров' });
+      res.status(500).json({ message: 'Ошибка сервера при получении товаров', error: error.message });
    }
 });
 
-// Добавить товар
-router.post('/', async (req, res) => {
-   const { name, description, price, stock } = req.body;
-   console.log('[POST] Получены данные для добавления:', req.body);
-   if (!name || price === undefined) {
-      return res.status(400).json({ message: 'Обязательные поля: name и price' });
-   }
+// GET /api/products/:id — получить товар по ID
+router.get('/:id', async (req, res) => {
+   const { id } = req.params;
 
    try {
-      const [result] = await db.execute(
-         `INSERT INTO products (name, description, price, stock) VALUES (?, ?, ?, ?)`,
-         [name, description || '', price, stock || 0]
-      );
-      console.log('[POST] Результат вставки:', result);
+      const [rows] = await db.query('SELECT * FROM products WHERE id = ?', [id]);
 
-      const [newProductRows] = await db.query('SELECT * FROM products WHERE id = LAST_INSERT_ID()');
-      res.status(201).json(newProductRows[0]);
+      if (rows.length === 0) {
+         return res.status(404).json({ message: 'Product not found' });
+      }
+
+      const product = rows[0];
+
+      product.colors = product.colors ? product.colors.split(',') : [];
+
+      try {
+         product.sizes = product.sizes ? JSON.parse(product.sizes) : {};
+      } catch {
+         product.sizes = {};
+      }
+
+      res.json(product);
+   } catch (err) {
+      console.error('Ошибка при получении товара по ID:', err);
+      res.status(500).json({ message: 'Ошибка сервера', error: err.message });
+   }
+});
+
+// POST /api/products — добавить товар с фото
+router.post('/', upload.array('images', 5), async (req, res) => {
+   try {
+      const { name, description = '', price, stock = 0, discount = 0, colors = '', sizes = '' } = req.body;
+
+      if (!name || !price) {
+         return res.status(400).json({ message: 'Обязательные поля: name и price' });
+      }
+
+      const priceNum = Number(price);
+      const stockNum = Number(stock);
+      const discountNum = Number(discount);
+
+      const [result] = await db.execute(
+         `INSERT INTO products (name, description, price, stock, discount, colors, sizes)
+          VALUES (?, ?, ?, ?, ?, ?, ?)`,
+         [name, description, priceNum, stockNum, discountNum, colors, sizes]
+      );
+
+      const newProductId = result.insertId;
+
+      if (req.files && req.files.length > 0) {
+         for (const file of req.files) {
+            const imageUrl = `/images/products/${file.filename}`;
+            await db.execute(
+               `INSERT INTO product_images (product_id, image_url) VALUES (?, ?)`,
+               [newProductId, imageUrl]
+            );
+         }
+      }
+
+      const hostUrl = req.hostUrl || 'http://localhost:10000';
+
+      const [rows] = await db.query(
+         `SELECT 
+            p.*, (
+               SELECT CONCAT(?, pi.image_url)
+               FROM product_images pi
+               WHERE pi.product_id = p.id AND pi.image_url LIKE '%main%'
+               LIMIT 1
+            ) AS main_image
+          FROM products p
+          WHERE p.id = ?`,
+         [hostUrl, newProductId]
+      );
+
+      res.status(201).json(rows[0]);
    } catch (error) {
       console.error('Ошибка добавления товара:', error);
       res.status(500).json({ message: 'Ошибка сервера при добавлении товара' });
    }
 });
 
-// Удалить товар
-router.delete('/:id', async (req, res) => {
-   const { id } = req.params;
-   console.log('[DELETE] Запрос на удаление товара с id:', id);
+// PUT /api/products/:id — обновить товар, возможно с новыми фото
+router.put('/:id', upload.array('images', 5), async (req, res) => {
+   const productId = Number(req.params.id);
 
    try {
-      const [result] = await db.execute('DELETE FROM products WHERE id = ?', [id]);
-      console.log('[DELETE] Результат удаления:', result);
+      const { name, description = '', price, stock = 0, discount = 0, colors = '', sizes = '' } = req.body;
 
-      if (result.affectedRows === 0) {
-         return res.status(404).json({ message: 'Товар не найден' });
+      if (!name || !price) {
+         return res.status(400).json({ message: 'Обязательные поля: name и price' });
       }
 
-      res.json({ message: 'Товар удалён' });
-   } catch (error) {
-      console.error('Ошибка удаления товара:', error);
-      res.status(500).json({ message: 'Ошибка сервера при удалении товара' });
-   }
-});
+      const priceNum = Number(price);
+      const stockNum = Number(stock);
+      const discountNum = Number(discount);
 
-// Обновить товар
-router.put('/:id', async (req, res) => {
-   const { id } = req.params;
-   const { name, description, price, stock } = req.body;
-
-   console.log('[PUT] Получены данные для обновления:', { id, name, description, price, stock });
-
-   if (!name || price === undefined) {
-      return res.status(400).json({ message: 'Обязательные поля: name и price' });
-   }
-
-   try {
-      // Логируем цену до обновления
-      const [beforeUpdate] = await db.query('SELECT price FROM products WHERE id = ?', [id]);
-      console.log('[PUT] Цена до обновления:', beforeUpdate[0]?.price);
-
-      // Выполняем обновление
       const [result] = await db.execute(
-         `UPDATE products SET name = ?, description = ?, price = ?, stock = ? WHERE id = ?`,
-         [name, description || '', price, stock || 0, id]
+         `UPDATE products
+          SET name = ?, description = ?, price = ?, stock = ?, discount = ?, colors = ?, sizes = ?
+          WHERE id = ?`,
+         [name, description, priceNum, stockNum, discountNum, colors, sizes, productId]
       );
-      console.log('[PUT] Результат обновления:', result);
 
       if (result.affectedRows === 0) {
          return res.status(404).json({ message: 'Товар не найден' });
       }
 
-      // Логируем цену после обновления
-      const [afterUpdate] = await db.query('SELECT price FROM products WHERE id = ?', [id]);
-      console.log('[PUT] Цена после обновления:', afterUpdate[0]?.price);
+      if (req.files && req.files.length > 0) {
+         for (const file of req.files) {
+            const imageUrl = `/images/products/${file.filename}`;
+            await db.execute(
+               `INSERT INTO product_images (product_id, image_url) VALUES (?, ?)`,
+               [productId, imageUrl]
+            );
+         }
+      }
 
-      const hostUrl = req.hostUrl;
-      const [updatedRows] = await db.query(
+      const hostUrl = req.hostUrl || 'http://localhost:10000';
+      const [rows] = await db.query(
          `SELECT 
-         p.id, p.name, p.description, p.price, p.stock, p.created_at,
-         (
-           SELECT CONCAT(?, pi.image_url) 
-           FROM product_images pi 
-           WHERE pi.product_id = p.id AND pi.image_url LIKE '%main.jpg' 
-           LIMIT 1
-         ) AS main_image
-       FROM products p
-       WHERE p.id = ?`,
-         [hostUrl, id]
+            p.*, (
+               SELECT CONCAT(?, pi.image_url)
+               FROM product_images pi
+               WHERE pi.product_id = p.id AND pi.image_url LIKE '%main%'
+               LIMIT 1
+            ) AS main_image
+          FROM products p
+          WHERE p.id = ?`,
+         [hostUrl, productId]
       );
 
-      res.json(updatedRows[0]);
+      res.json(rows[0]);
    } catch (error) {
       console.error('Ошибка обновления товара:', error);
       res.status(500).json({ message: 'Ошибка сервера при обновлении товара' });
    }
 });
 
-// Получить информацию о базе
-router.get('/dbinfo', async (req, res) => {
+// DELETE /api/products/:id — удалить товар и его изображения
+router.delete('/:id', async (req, res) => {
+   const productId = req.params.id;
    try {
-      const [result] = await db.query('SELECT DATABASE() as dbName, @@hostname as host, @@port as port');
-      res.json(result[0]);
-   } catch (err) {
-      console.error('Ошибка получения информации о базе:', err);
-      res.status(500).json({ error: err.message });
+      const [images] = await db.query(
+         'SELECT image_url FROM product_images WHERE product_id = ?',
+         [productId]
+      );
+
+      for (const img of images) {
+         const filePath = path.join(__dirname, '..', img.image_url);
+         if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+         }
+      }
+
+      await db.execute('DELETE FROM product_images WHERE product_id = ?', [productId]);
+      const [result] = await db.execute('DELETE FROM products WHERE id = ?', [productId]);
+
+      if (result.affectedRows === 0) {
+         return res.status(404).json({ message: 'Товар не найден' });
+      }
+
+      res.json({ message: 'Товар удалён успешно' });
+   } catch (error) {
+      console.error('Ошибка удаления товара:', error);
+      res.status(500).json({ message: 'Ошибка сервера при удалении товара' });
    }
 });
 

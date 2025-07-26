@@ -103,7 +103,11 @@ const CatalogPage = () => {
                         key={item.id}
                         id={item.id}
                         name={item.name}
-                        price={item.price}
+                        price={item.discount > 0
+                           ? Math.round(item.price * (1 - item.discount / 100))
+                           : item.price}
+                        oldPrice={item.discount > 0 ? item.price : null}
+                        discount={item.discount}
                         image={item.main_image || '/default-image.png'}
                         stock={item.stock}
                         description={item.description}

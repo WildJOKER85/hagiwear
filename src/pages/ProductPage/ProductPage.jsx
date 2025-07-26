@@ -18,6 +18,30 @@ const ProductPage = () => {
    const [addedToCart, setAddedToCart] = useState(false);
    const [isZoomed, setIsZoomed] = useState(false);
 
+   // Парсим размеры, если они строкой
+   const parsedSizes = (() => {
+      if (!product?.sizes) return {};
+      if (typeof product.sizes === 'string') {
+         // Пример: "XS:5;S:2;M:0"
+         // или "XS,S,M" — тут надо знать формат, если через запятую, тогда сделать так:
+         // const arr = product.sizes.split(',');
+         // return arr.reduce((acc, size) => ({ ...acc, [size.trim()]: 10 }), {}); // например stock=10 по умолчанию
+         // Но лучше уточни формат на бекенде.
+         try {
+            // Если строка в формате JSON
+            return JSON.parse(product.sizes);
+         } catch {
+            // Если просто через запятую — считаем все в наличии по 10 шт.
+            const arr = product.sizes.split(',').map(s => s.trim()).filter(Boolean);
+            const obj = {};
+            arr.forEach(s => (obj[s] = 10));
+            return obj;
+         }
+      }
+      // Если уже объект
+      return product.sizes;
+   })();
+
    useEffect(() => {
       async function fetchProduct() {
          try {
@@ -32,7 +56,6 @@ const ProductPage = () => {
             setProduct(null);
          }
       }
-
       fetchProduct();
    }, [id]);
 
@@ -45,6 +68,7 @@ const ProductPage = () => {
             if (!res.ok) throw new Error('Նկարները չեն բեռնվել');
             const imgs = await res.json();
             const urls = imgs.map(img => img.image_url);
+            console.log(urls, 'urls');
             setImages(urls);
             setSelectedImage(urls[0] || '');
          } catch (err) {
@@ -53,13 +77,16 @@ const ProductPage = () => {
             setSelectedImage('');
          }
       }
-
       fetchImages();
    }, [product]);
 
    if (product === null) return <p className={styles.notFound}>Ապրանքը չի գտնվել։</p>;
 
-   const isOutOfStock = selectedSize ? (product.sizes?.[selectedSize] ?? 0) <= 0 : false;
+   const discount = product.discount || 0;
+   const discountedPrice =
+      discount > 0 ? Math.round(product.price * (1 - discount / 100)) : product.price;
+
+   const isOutOfStock = selectedSize ? (parsedSizes[selectedSize] ?? 0) <= 0 : false;
 
    const handleAddToCart = async () => {
       if (!selectedSize) {
@@ -69,20 +96,21 @@ const ProductPage = () => {
 
       if (user) {
          try {
-            await fetch(`${BASE_URL}/api/cart`, {
+            const res = await fetch(`${BASE_URL}/api/cart`, {
                method: 'POST',
-               headers: {
-                  'Content-Type': 'application/json'
-               },
+               headers: { 'Content-Type': 'application/json' },
                body: JSON.stringify({
                   userId: user.id,
                   productId: product.id,
                   quantity,
-                  size: selectedSize
-               })
+                  size: selectedSize,
+               }),
             });
+            if (!res.ok) throw new Error('Չհաջողվեց ավելացնել զամբյուղ');
          } catch (err) {
             console.error('Error adding to cart:', err);
+            alert('Սխալ՝ չի հաջողվում ավելացնել զամբյուղ');
+            return;
          }
       } else {
          const existingCart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -99,7 +127,7 @@ const ProductPage = () => {
                price: product.price,
                images: [selectedImage],
                size: selectedSize,
-               quantity
+               quantity,
             });
          }
 
@@ -113,7 +141,9 @@ const ProductPage = () => {
 
    return (
       <div className={styles.wrapper}>
-         <button className={styles.backBtn} onClick={() => navigate(-1)}>← Վերադառնալ</button>
+         <button className={styles.backBtn} onClick={() => navigate(-1)}>
+            ← Վերադառնալ
+         </button>
 
          <div className={styles.container}>
             <div className={styles.imageSection}>
@@ -146,12 +176,24 @@ const ProductPage = () => {
 
             <div className={styles.info}>
                <h1>{product.name}</h1>
-               <p className={styles.price}>{product.price} ֏</p>
+
+               <div className={styles.priceWrapper}>
+                  {discount > 0 ? (
+                     <>
+                        <span className={styles.oldPrice}>{product.price.toLocaleString()} ֏</span>
+                        <span className={styles.discountedPrice}>{discountedPrice.toLocaleString()} ֏</span>
+                        <span className={styles.discountBadge}>- {discount}%</span>
+                     </>
+                  ) : (
+                     <span className={styles.price}>{product.price.toLocaleString()} ֏</span>
+                  )}
+               </div>
+
                <p className={styles.description}>{product.description}</p>
 
                <div className={styles.sizeRow}>
                   <div className={styles.sizeSelector}>
-                     {product.sizes && Object.entries(product.sizes).map(([size, stock]) => (
+                     {Object.entries(parsedSizes).map(([size, stock]) => (
                         <button
                            key={size}
                            className={`${styles.sizeBtn} ${selectedSize === size ? styles.active : ''}`}
@@ -167,7 +209,12 @@ const ProductPage = () => {
                      {selectedSize && (
                         <>
                            <p>Չափսը՝ {selectedSize}</p>
-                           <p>Վիճակ՝ <strong>{product.sizes[selectedSize] > 0 ? 'Առկա է' : 'Առկա չէ'}</strong></p>
+                           <p>
+                              Վիճակ՝{' '}
+                              <strong>
+                                 {parsedSizes[selectedSize] > 0 ? 'Առկա է' : 'Առկա չէ'}
+                              </strong>
+                           </p>
                            <button onClick={() => setSelectedSize(null)} className={styles.clearBtn}>
                               Ջնջել ընտրությունը
                            </button>
@@ -178,7 +225,12 @@ const ProductPage = () => {
 
                {selectedSize && (
                   <p className={styles.stock}>
-                     Վիճակ՝ <strong>{isOutOfStock ? 'Առկա չէ' : `Առկա է (${product.sizes[selectedSize]} հատ)`}</strong>
+                     Վիճակ՝{' '}
+                     <strong>
+                        {isOutOfStock
+                           ? 'Առկա չէ'
+                           : `Առկա է (${parsedSizes[selectedSize]} հատ)`}
+                     </strong>
                   </p>
                )}
 
@@ -198,9 +250,7 @@ const ProductPage = () => {
             </div>
          </div>
 
-         {addedToCart && (
-            <div className={styles.cartNotification}>✅ Ավելացված է զամբյուղ</div>
-         )}
+         {addedToCart && <div className={styles.cartNotification}>✅ Ավելացված է զամբյուղ</div>}
       </div>
    );
 };

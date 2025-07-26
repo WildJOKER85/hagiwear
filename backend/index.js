@@ -17,13 +17,16 @@ const PORT = process.env.PORT || 10000;
 // Чтобы в API можно было формировать правильный URL для картинок
 const HOST_URL = `http://localhost:${PORT}`;
 
+// Добавляем в каждый запрос hostUrl (используется для формирования полного пути к картинкам)
 app.use((req, res, next) => {
    req.hostUrl = HOST_URL;
    next();
 });
 
 app.use(cors());
-app.use(express.json());
+
+// Не используем express.json() и express.urlencoded() глобально — multer будет обрабатывать multipart/form-data
+
 app.use(morgan('dev'));
 
 // Статика для картинок
@@ -31,9 +34,13 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 
 // Роуты API
 app.use('/api/product-images', productImagesRouter);
+
+// multer настроен внутри productsRouter — здесь без express.json()/urlencoded
 app.use('/api/products', productsRouter);
-app.use('/api/auth', authRouter);
-app.use('/api/cart', cartRouter);
+
+// Для остальных роутов, где нет файлов — используем express.json() локально
+app.use('/api/auth', express.json(), authRouter);
+app.use('/api/cart', express.json(), cartRouter);
 
 app.get('/', (req, res) => {
    res.send('✅ Backend работает локально!');
