@@ -32,7 +32,8 @@ router.get('/', async (req, res) => {
             (
                SELECT CONCAT(?, pi.image_url)
                FROM product_images pi
-               WHERE pi.product_id = p.id AND pi.image_url LIKE '%main%'
+               WHERE pi.product_id = p.id
+               ORDER BY pi.id ASC
                LIMIT 1
             ) AS main_image
          FROM products p
@@ -110,14 +111,17 @@ router.post('/', upload.array('images', 5), async (req, res) => {
 
       const [rows] = await db.query(
          `SELECT 
-            p.*, (
+            p.id, p.name, p.description, p.price, p.stock,
+            p.discount, p.colors, p.sizes, p.created_at,
+            (
                SELECT CONCAT(?, pi.image_url)
                FROM product_images pi
-               WHERE pi.product_id = p.id AND pi.image_url LIKE '%main%'
+               WHERE pi.product_id = p.id
+               ORDER BY pi.id ASC
                LIMIT 1
             ) AS main_image
-          FROM products p
-          WHERE p.id = ?`,
+         FROM products p
+         WHERE p.id = ?`,
          [hostUrl, newProductId]
       );
 
@@ -155,6 +159,25 @@ router.put('/:id', upload.array('images', 5), async (req, res) => {
       }
 
       if (req.files && req.files.length > 0) {
+         // 1. Получаем старые фото для удаления с диска
+         const [oldImages] = await db.query('SELECT image_url FROM product_images WHERE product_id = ?', [productId]);
+
+         // 2. Удаляем записи из базы
+         await db.execute('DELETE FROM product_images WHERE product_id = ?', [productId]);
+
+         // 3. Удаляем старые файлы (если они есть)
+         for (const img of oldImages) {
+            const filePath = path.join(__dirname, '..', img.image_url);
+            try {
+               if (fs.existsSync(filePath)) {
+                  fs.unlinkSync(filePath);
+               }
+            } catch (err) {
+               console.error('Ошибка при удалении файла:', err);
+            }
+         }
+
+         // 4. Сохраняем новые изображения
          for (const file of req.files) {
             const imageUrl = `/images/products/${file.filename}`;
             await db.execute(
@@ -165,16 +188,20 @@ router.put('/:id', upload.array('images', 5), async (req, res) => {
       }
 
       const hostUrl = req.hostUrl || 'http://localhost:10000';
+
       const [rows] = await db.query(
          `SELECT 
-            p.*, (
+            p.id, p.name, p.description, p.price, p.stock,
+            p.discount, p.colors, p.sizes, p.created_at,
+            (
                SELECT CONCAT(?, pi.image_url)
                FROM product_images pi
-               WHERE pi.product_id = p.id AND pi.image_url LIKE '%main%'
+               WHERE pi.product_id = p.id
+               ORDER BY pi.id ASC
                LIMIT 1
             ) AS main_image
-          FROM products p
-          WHERE p.id = ?`,
+         FROM products p
+         WHERE p.id = ?`,
          [hostUrl, productId]
       );
 

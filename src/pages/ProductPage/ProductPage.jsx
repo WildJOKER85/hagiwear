@@ -162,18 +162,20 @@ const ProductPage = () => {
                </div>
 
                <div className={styles.thumbnailRow}>
-                  {images.map((img, idx) => (
-                     <img
-                        key={idx}
-                        src={img}
-                        alt={`Thumbnail ${idx + 1}`}
-                        className={`${styles.thumb} ${selectedImage === img ? styles.activeThumb : ''}`}
-                        onClick={() => setSelectedImage(img)}
-                     />
-                  ))}
+                  {images
+                     .slice(1, 3) // пропускаем главное, показываем только доп. 1 и доп. 2
+                     .filter(Boolean)
+                     .map((img, idx) => (
+                        <img
+                           key={idx}
+                           src={img}
+                           alt={`Thumbnail ${idx + 1}`}
+                           className={`${styles.thumb} ${selectedImage === img ? styles.activeThumb : ''}`}
+                           onClick={() => setSelectedImage(img)}
+                        />
+                     ))}
                </div>
             </div>
-
             <div className={styles.info}>
                <h1>{product.name}</h1>
 

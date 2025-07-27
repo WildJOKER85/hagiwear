@@ -1,3 +1,7 @@
+// Шаг 1. Обновим AdminPage.jsx, чтобы можно было загружать
+// 1 главное и 2 доп. изображения с отдельными input'ами
+// Мы используем refs для каждого поля (главное, доп1, доп2)
+
 import { useEffect, useState, useRef } from 'react';
 import styles from './AdminPage.module.css';
 
@@ -16,7 +20,9 @@ const AdminPage = () => {
       sizes: '',
    });
    const [isEditing, setIsEditing] = useState(false);
-   const fileInputRef = useRef(null);
+   const mainImageRef = useRef(null);
+   const extraImage1Ref = useRef(null);
+   const extraImage2Ref = useRef(null);
 
    const loadProducts = () => {
       fetch(`${API_URL}?t=${Date.now()}`)
@@ -25,7 +31,6 @@ const AdminPage = () => {
             return res.json();
          })
          .then((data) => {
-            console.log(data);
             const processed = data.map((item) => ({
                ...item,
                price: Number(item.price),
@@ -80,12 +85,13 @@ const AdminPage = () => {
       form.append('colors', formData.colors.trim());
       form.append('sizes', formData.sizes.trim());
 
-      const files = fileInputRef.current?.files;
-      if (files?.length > 0) {
-         for (const file of files) {
-            form.append('images', file);
-         }
-      }
+      const mainFile = mainImageRef.current?.files?.[0];
+      const extra1 = extraImage1Ref.current?.files?.[0];
+      const extra2 = extraImage2Ref.current?.files?.[0];
+
+      if (mainFile) form.append('images', mainFile);
+      if (extra1) form.append('images', extra1);
+      if (extra2) form.append('images', extra2);
 
       const url = isEditing ? `${API_URL}/${formData.id}` : API_URL;
       const method = isEditing ? 'PUT' : 'POST';
@@ -109,7 +115,9 @@ const AdminPage = () => {
             colors: '',
             sizes: '',
          });
-         if (fileInputRef.current) fileInputRef.current.value = '';
+         mainImageRef.current.value = '';
+         extraImage1Ref.current.value = '';
+         extraImage2Ref.current.value = '';
          setIsEditing(false);
       } catch (error) {
          console.error('Սխալ ապրանքի պահպանման ժամանակ:', error);
@@ -152,66 +160,22 @@ const AdminPage = () => {
       <div className={styles.container}>
          <h2>{isEditing ? 'Խմբագրել ապրանքը' : 'Ավելացնել ապրանք'}</h2>
          <form className={styles.form} onSubmit={handleSubmit}>
-            <input
-               name="name"
-               placeholder="Անուն"
-               value={formData.name}
-               onChange={handleChange}
-               required
-            />
-            <input
-               name="description"
-               placeholder="Նկարագիր"
-               value={formData.description}
-               onChange={handleChange}
-            />
-            <input
-               name="price"
-               placeholder="Գին"
-               value={formData.price}
-               onChange={handleChange}
-               type="number"
-               min="0"
-               required
-            />
-            <input
-               name="stock"
-               placeholder="Պահեստի քանակ"
-               value={formData.stock}
-               onChange={handleChange}
-               type="number"
-               min="0"
-            />
-            <input
-               name="discount"
-               placeholder="Զեղչ (%)"
-               value={formData.discount}
-               onChange={handleChange}
-               type="number"
-               min="0"
-               max="100"
-            />
-            <input
-               name="colors"
-               placeholder="Գույներ (բաժանված ստորակետով)"
-               value={formData.colors}
-               onChange={handleChange}
-            />
-            <input
-               name="sizes"
-               placeholder="Չափսեր (բաժանված ստորակետով, օրինակ XS,S,M)"
-               value={formData.sizes}
-               onChange={handleChange}
-            />
-            <input
-               type="file"
-               ref={fileInputRef}
-               accept="image/*"
-               multiple
-            />
-            <button type="submit">
-               {isEditing ? 'Պահպանել' : 'Ավելացնել'}
-            </button>
+            <input name="name" placeholder="Անուն" value={formData.name} onChange={handleChange} required />
+            <input name="description" placeholder="Նկարագիր" value={formData.description} onChange={handleChange} />
+            <input name="price" placeholder="Գին" value={formData.price} onChange={handleChange} type="number" min="0" required />
+            <input name="stock" placeholder="Պահեստի քանակ" value={formData.stock} onChange={handleChange} type="number" min="0" />
+            <input name="discount" placeholder="Զեղչ (%)" value={formData.discount} onChange={handleChange} type="number" min="0" max="100" />
+            <input name="colors" placeholder="Գույներ (բաժանված ստորակետով)" value={formData.colors} onChange={handleChange} />
+            <input name="sizes" placeholder="Չափսեր (բաժանված ստորակետով, օրինակ XS,S,M)" value={formData.sizes} onChange={handleChange} />
+
+            <label>Գլխավոր նկար:</label>
+            <input type="file" ref={mainImageRef} accept="image/*" />
+            <label>Լրացուցիչ նկար 1:</label>
+            <input type="file" ref={extraImage1Ref} accept="image/*" />
+            <label>Լրացուցիչ նկար 2:</label>
+            <input type="file" ref={extraImage2Ref} accept="image/*" />
+
+            <button type="submit">{isEditing ? 'Պահպանել' : 'Ավելացնել'}</button>
          </form>
 
          <div className={styles.list}>
@@ -234,18 +198,8 @@ const AdminPage = () => {
                            Գին:{' '}
                            {product.discount > 0 ? (
                               <>
-                                 <span
-                                    style={{
-                                       textDecoration: 'line-through',
-                                       color: '#888',
-                                       marginRight: '8px',
-                                    }}
-                                 >
-                                    {product.price} ֏
-                                 </span>
-                                 <span style={{ color: '#EE4D31' }}>
-                                    {Math.round(product.price * (1 - product.discount / 100))} ֏
-                                 </span>
+                                 <span style={{ textDecoration: 'line-through', color: '#888', marginRight: '8px' }}>{product.price} ֏</span>
+                                 <span style={{ color: '#EE4D31' }}>{Math.round(product.price * (1 - product.discount / 100))} ֏</span>
                               </>
                            ) : (
                               `${product.price} ֏`
@@ -257,12 +211,8 @@ const AdminPage = () => {
                         <p>Չափսեր: {product.sizes || '-'}</p>
                      </div>
                      <div className={styles.actions}>
-                        <button onClick={() => handleEdit(product)} title="Խմբագրել">
-                           ✏️
-                        </button>
-                        <button onClick={() => handleDelete(product.id)} title="Ջնջել">
-                           🗑️
-                        </button>
+                        <button onClick={() => handleEdit(product)} title="Խմբագրել">✏️</button>
+                        <button onClick={() => handleDelete(product.id)} title="Ջնջել">🗑️</button>
                      </div>
                   </div>
                ))
