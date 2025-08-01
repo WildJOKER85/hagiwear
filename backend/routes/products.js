@@ -13,8 +13,8 @@ const storage = multer.diskStorage({
       cb(null, dir);
    },
    filename: (req, file, cb) => {
-      const uniqueName = `product-${Date.now()}-${Math.round(Math.random() * 1000)}${path.extname(file.originalname)}`;
-      cb(null, uniqueName);
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, uniqueSuffix + path.extname(file.originalname));
    },
 });
 
@@ -76,10 +76,19 @@ router.get('/:id', async (req, res) => {
    }
 });
 
-// POST /api/products — добавить товар с фото
+// POST /api/products — добавить товар с фото и остатками по цвету/размеру
 router.post('/', upload.array('images', 5), async (req, res) => {
    try {
-      const { name, description = '', price, stock = 0, discount = 0, colors = '', sizes = '' } = req.body;
+      const {
+         name,
+         description = '',
+         price,
+         stock = 0,
+         discount = 0,
+         colors = '',
+         sizes = '',
+         stockByColorSize = '{}', // JSON строка, например: {"Белый":{"S":2,"M":4},"Чёрный":{"L":1}}
+      } = req.body;
 
       if (!name || !price) {
          return res.status(400).json({ message: 'Обязательные поля: name и price' });
@@ -89,14 +98,15 @@ router.post('/', upload.array('images', 5), async (req, res) => {
       const stockNum = Number(stock);
       const discountNum = Number(discount);
 
+      // 1. Сохраняем товар в таблицу products
       const [result] = await db.execute(
          `INSERT INTO products (name, description, price, stock, discount, colors, sizes)
           VALUES (?, ?, ?, ?, ?, ?, ?)`,
          [name, description, priceNum, stockNum, discountNum, colors, sizes]
       );
-
       const newProductId = result.insertId;
 
+      // 2. Сохраняем изображения в таблицу product_images
       if (req.files && req.files.length > 0) {
          for (const file of req.files) {
             const imageUrl = `/images/products/${file.filename}`;
@@ -107,8 +117,23 @@ router.post('/', upload.array('images', 5), async (req, res) => {
          }
       }
 
-      const hostUrl = req.hostUrl || 'http://localhost:10000';
+      // 3. Сохраняем остатки по цвету и размеру
+      const parsedStock = JSON.parse(stockByColorSize); // JSON -> Object
+      for (const color in parsedStock) {
+         for (const size in parsedStock[color]) {
+            const quantity = Number(parsedStock[color][size]) || 0;
+            if (quantity > 0) {
+               await db.execute(
+                  `INSERT INTO product_stock (product_id, color, size, quantity)
+                   VALUES (?, ?, ?, ?)`,
+                  [newProductId, color, size, quantity]
+               );
+            }
+         }
+      }
 
+      // 4. Возвращаем добавленный товар с main_image
+      const hostUrl = req.hostUrl || 'http://localhost:10000';
       const [rows] = await db.query(
          `SELECT 
             p.id, p.name, p.description, p.price, p.stock,
@@ -120,8 +145,8 @@ router.post('/', upload.array('images', 5), async (req, res) => {
                ORDER BY pi.id ASC
                LIMIT 1
             ) AS main_image
-         FROM products p
-         WHERE p.id = ?`,
+          FROM products p
+          WHERE p.id = ?`,
          [hostUrl, newProductId]
       );
 
@@ -131,6 +156,7 @@ router.post('/', upload.array('images', 5), async (req, res) => {
       res.status(500).json({ message: 'Ошибка сервера при добавлении товара' });
    }
 });
+
 
 // PUT /api/products/:id — обновить товар, возможно с новыми фото
 router.put('/:id', upload.array('images', 5), async (req, res) => {

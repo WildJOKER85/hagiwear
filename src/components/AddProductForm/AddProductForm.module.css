@@ -1,0 +1,294 @@
+.form {
+   display: flex;
+   flex-direction: column;
+   gap: 1rem;
+   background-color: var(--color-bg);
+   padding: 1.5rem 1.5rem 1.5rem 1.5rem;
+   border-radius: 12px;
+   max-width: 600px;
+   margin: 0 auto;
+   font-family: var(--font-family);
+   font-size: var(--font-sm);
+   color: var(--color-white);
+   box-sizing: border-box;
+}
+
+label {
+   font-size: var(--font-sm);
+   margin-bottom: 0.25rem;
+   font-weight: 600;
+   color: var(--color-white);
+   display: block;
+}
+
+input[type="text"],
+input[type="number"],
+textarea {
+   background-color: #222;
+   border: 1px solid #444;
+   border-radius: 6px;
+   padding: 0.5rem;
+   font-size: var(--font-sm);
+   color: var(--color-white);
+   width: 100%;
+   box-sizing: border-box;
+   word-break: break-word;
+}
+
+textarea {
+   overflow-y: auto;
+   resize: none;
+   min-height: 40px;
+   max-height: 200px;
+}
+
+/* Размеры */
+.sizePicker {
+   display: flex;
+   flex-direction: column;
+   gap: 0.5rem;
+}
+
+.sizeOptions {
+   display: flex;
+   gap: 8px;
+   flex-wrap: wrap;
+}
+
+.sizeLabel {
+   position: relative;
+   cursor: pointer;
+   padding: 6px 12px;
+   border: 2px solid #555;
+   border-radius: 6px;
+   user-select: none;
+   font-size: var(--font-sm);
+   color: #bbb;
+   transition: all 0.3s ease;
+   min-width: 40px;
+   text-align: center;
+   background-color: #222;
+}
+
+.sizeLabel input {
+   position: absolute;
+   opacity: 0;
+   pointer-events: none;
+}
+
+.sizeLabel input:checked+.checkmark {
+   background-color: var(--color-primary);
+   border-color: var(--color-primary);
+   color: white;
+}
+
+.checkmark {
+   display: inline-block;
+   width: 20px;
+   height: 20px;
+   margin-right: 6px;
+   vertical-align: middle;
+   border: 2px solid #555;
+   border-radius: 4px;
+   transition: all 0.3s ease;
+   position: relative;
+}
+
+.sizeLabel input:checked+.checkmark::after {
+   content: '✔';
+   position: absolute;
+   top: -2px;
+   left: 2px;
+   font-size: 14px;
+   color: white;
+}
+
+/* Цвета */
+.colorPicker {
+   display: flex;
+   flex-direction: column;
+   gap: 0.5rem;
+}
+
+.colorOptions {
+   display: flex;
+   gap: 10px;
+   margin-top: 5px;
+   flex-wrap: wrap;
+}
+
+.colorCircle {
+   width: 28px;
+   height: 28px;
+   border-radius: 50%;
+   cursor: pointer;
+   border: 2px solid transparent;
+   transition: transform 0.2s ease, border-color 0.2s ease;
+   box-sizing: border-box;
+   object-fit: cover;
+   aspect-ratio: 1 / 1;
+}
+
+.colorCircle input {
+   display: none;
+}
+
+.colorCircle.white {
+   background-color: #fff;
+}
+
+.colorCircle.black {
+   background-color: #000;
+}
+
+.colorCircle.red {
+   background-color: red;
+}
+
+.colorCircle.blue {
+   background-color: blue;
+}
+
+.colorCircle.yellow {
+   background-color: yellow;
+}
+
+.colorCircle.green {
+   background-color: green;
+}
+
+.colorCircle.selected {
+   transform: scale(1.2);
+   border-color: var(--color-primary);
+}
+
+/* Превью картинок */
+.imageUploadSection {
+   display: flex;
+   flex-direction: column;
+   gap: 0.75rem;
+   padding-right: 5px;
+   box-sizing: border-box;
+}
+
+.imageUploadSection label {
+   display: block;
+   margin-bottom: 0.3rem;
+   color: var(--color-white);
+   font-size: var(--font-sm);
+}
+
+.imageUploadSection input[type="file"] {
+   cursor: pointer;
+   padding: 4px 6px;
+   background-color: #333;
+   border-radius: 6px;
+   border: none;
+   color: var(--color-white);
+   font-size: var(--font-sm);
+   width: 100%;
+   box-sizing: border-box;
+}
+
+.previewImage {
+   max-width: 120px;
+   max-height: 120px;
+   border-radius: 6px;
+   margin-top: 6px;
+   object-fit: cover;
+   border: 1px solid #444;
+}
+
+/* Кнопка */
+.addButton {
+   background-color: var(--color-primary);
+   color: var(--color-white);
+   border: none;
+   border-radius: 8px;
+   padding: 0.6rem 1.2rem;
+   font-size: var(--font-md);
+   cursor: pointer;
+   transition: background-color 0.2s ease;
+   align-self: flex-start;
+   margin-top: 1rem;
+}
+
+.addButton:hover {
+   background-color: #c63e24;
+}
+
+/* Медиа-запросы */
+
+/* До планшета */
+@media (max-width: var(--tablet)) {
+   .form {
+      padding: 1rem;
+   }
+
+   .colorCircle {
+      width: 24px;
+      height: 24px;
+   }
+
+   .sizeLabel {
+      padding: 5px 10px;
+      font-size: var(--font-sm);
+      min-width: 36px;
+   }
+
+   .addButton {
+      padding: 0.5rem 1rem;
+      font-size: var(--font-sm);
+   }
+}
+
+/* Мобильный (480px) */
+@media (max-width: var(--mobile)) {
+   .colorCircle {
+      width: 22px;
+      height: 22px;
+   }
+
+   .colorOptions {
+      gap: 6px;
+   }
+
+   .sizeOptions {
+      gap: 6px;
+   }
+
+   .sizeLabel {
+      padding: 4px 8px;
+      font-size: var(--font-xs);
+      min-width: 30px;
+   }
+
+   .imageUploadSection input[type="file"] {
+      font-size: var(--font-xs);
+      padding: 5px 8px;
+   }
+
+   .addButton {
+      padding: 0.4rem 0.8rem;
+      font-size: var(--font-xs);
+   }
+}
+
+/* Самый маленький (320px) */
+@media (max-width: var(--mobile-xs)) {
+   .colorCircle {
+      width: 18px;
+      height: 18px;
+   }
+
+   .sizeLabel {
+      padding: 3px 6px;
+      font-size: var(--font-xs);
+      min-width: 26px;
+   }
+
+   .addButton {
+      padding: 0.3rem 0.6rem;
+      font-size: var(--font-xs);
+   }
+}

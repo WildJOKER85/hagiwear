@@ -10,10 +10,8 @@ import CartPage from './pages/CartPage/CartPage';
 import LoginPage from './pages/LoginPage/LoginPage';
 import RegisterPage from './pages/RegisterPage/RegisterPage';
 import AdminPage from './pages/AdminPage/AdminPage';
-// import CheckoutPage from './pages/CheckoutPage/CheckoutPage'
 
 const App = () => {
-  // return <CheckoutPage />
   return (
     <Routes>
       <Route path="/" element={<MainLayout />}>
