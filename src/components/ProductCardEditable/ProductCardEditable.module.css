@@ -2,38 +2,55 @@
    border: 1px solid #444;
    border-radius: 8px;
    padding: 10px;
-   margin: 10px;
+   background-color: #1e1e1e;
+   color: #ddd;
+   margin: 10px 0;
+   transition: box-shadow 0.3s ease;
+}
+
+.expanded {
+   max-height: 335px;
+   overflow: hidden;
+   flex-direction: column;
+   position: relative;
+   box-shadow: 0 0 0 2px #ee4d31;
    display: flex;
    gap: 12px;
    align-items: flex-start;
-   background-color: #1e1e1e;
-   color: #ddd;
-   max-height: 200px;
-   /* ограничение высоты */
-   overflow-y: auto;
 }
 
 .image {
    border-radius: 6px;
    object-fit: cover;
-   width: 100%;
-   max-height: 140px;
+   width: 140px;
+   height: 160px;
+   flex-shrink: 0;
+   position: relative;
+   left: 50%;
+   top: 0;
+   translate: -50% 0;
 }
 
 .info {
    flex: 1;
    font-size: 14px;
+   overflow-y: auto;
+   max-height: 130px;
+   padding-right: 6px;
+   margin-bottom: 0.7rem;
 }
 
-.oldPrice {
-   text-decoration: line-through;
-   color: #999;
-   margin-right: 6px;
+.info::-webkit-scrollbar {
+   width: 6px;
 }
 
-.newPrice {
-   color: #00c896;
-   font-weight: bold;
+.info::-webkit-scrollbar-thumb {
+   background-color: #444;
+   border-radius: 3px;
+}
+
+.info::-webkit-scrollbar-track {
+   background: transparent;
 }
 
 .actions {
@@ -43,16 +60,371 @@
    justify-content: center;
 }
 
+/* Большие кнопки для collapsed */
 .actions button {
    background: #333;
    border: none;
    border-radius: 6px;
    color: #fff;
-   padding: 6px;
+   padding: 6px 14px;
    cursor: pointer;
    transition: background 0.2s;
 }
 
 .actions button:hover {
    background: #555;
+}
+
+/* Компактные кнопки справа для expanded и edit */
+.compactActions {
+   position: absolute;
+   top: 12px;
+   right: 12px;
+   display: flex;
+   flex-direction: column;
+   gap: 6px;
+   width: 36px;
+   z-index: 10;
+}
+
+.compactActions button {
+   width: 36px;
+   height: 36px;
+   padding: 0;
+   background: #ee4d31;
+   border-radius: 6px;
+   color: #1e1e1e;
+   font-size: 18px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   cursor: pointer;
+   transition: background 0.3s;
+}
+
+.compactActions button:hover {
+   background: #ff6548;
+}
+
+/* --- Режим редактирования --- */
+.editMode {
+   max-height: 500px;
+   overflow-y: auto;
+   background-color: #252525;
+   border: 2px solid #ee4d31;
+   padding: 12px;
+   display: flex;
+   flex-direction: column;
+   gap: 12px;
+   position: relative;
+}
+
+.editForm {
+   display: flex;
+   flex-direction: column;
+   gap: 14px;
+   font-size: 14px;
+   color: #ddd;
+}
+
+.editForm label,
+.editForm fieldset {
+   display: flex;
+   flex-direction: column;
+   font-weight: 600;
+   gap: 6px;
+}
+
+.editForm input[type="text"],
+.editForm input[type="number"],
+.editForm textarea {
+   padding: 6px 10px;
+   border-radius: 6px;
+   border: 1px solid #555;
+   background-color: #1e1e1e;
+   color: #eee;
+   font-size: 14px;
+   resize: vertical;
+   transition: border-color 0.2s;
+}
+
+/* Размеры */
+.sizePicker {
+   display: flex;
+   gap: 0.3rem;
+}
+
+.sizeLabel {
+   position: relative;
+   cursor: pointer;
+   padding: 2px 6px;
+   border: 2px solid #555;
+   border-radius: 6px;
+   user-select: none;
+   font-size: var(--font-sm);
+   color: #bbb;
+   transition: all 0.3s ease;
+   min-width: 20px;
+   text-align: center;
+   background-color: #222;
+}
+
+.sizeLabel input {
+   position: absolute;
+   opacity: 0;
+   pointer-events: none;
+}
+
+.sizeLabel input:checked+.checkmark {
+   background-color: var(--color-primary);
+   border-color: var(--color-primary);
+   color: white;
+}
+
+.checkmark {
+   display: inline-block;
+   width: 20px;
+   height: 20px;
+   vertical-align: middle;
+   border: 2px solid #555;
+   border-radius: 4px;
+   transition: all 0.3s ease;
+   position: relative;
+}
+
+.sizeLabel input:checked+.checkmark::after {
+   content: '✔';
+   position: absolute;
+   top: -2px;
+   left: 2px;
+   font-size: 14px;
+   color: white;
+}
+
+/* Цвета */
+.colorPicker {
+   display: flex;
+   flex-direction: column;
+   gap: 0.5rem;
+}
+
+.colorOptions {
+   display: flex;
+   gap: 15px;
+   margin-top: 5px;
+   flex-wrap: wrap;
+}
+
+.colorCircle {
+   width: 26px;
+   height: 26px;
+   border-radius: 50%;
+   cursor: pointer;
+   border: 2px solid transparent;
+   transition: transform 0.2s ease, border-color 0.2s ease;
+   box-sizing: border-box;
+   object-fit: cover;
+   aspect-ratio: 1 / 1;
+}
+
+.colorCircle input {
+   display: none;
+}
+
+.colorCircle.white {
+   background-color: #fff;
+}
+
+.colorCircle.black {
+   background-color: #000;
+}
+
+.colorCircle.red {
+   background-color: red;
+}
+
+.colorCircle.blue {
+   background-color: blue;
+}
+
+.colorCircle.yellow {
+   background-color: yellow;
+}
+
+.colorCircle.green {
+   background-color: green;
+}
+
+.colorCircle.selected {
+   transform: scale(1.2);
+   border-color: var(--color-primary);
+}
+
+.editForm input[type="text"]:focus,
+.editForm input[type="number"]:focus,
+.editForm textarea:focus {
+   outline: none;
+   border-color: #ee4d31;
+}
+
+.inpImg {
+   padding: 0.5rem 0;
+   border: none;
+   border-radius: 10px;
+   background-color: #2b2b2b;
+   color: white;
+   font-size: 0.9rem;
+   transition: background-color 0.2s ease;
+}
+
+.imagesGroup {
+   display: flex;
+   gap: 16px;
+   flex-wrap: wrap;
+}
+
+.imageInputWrapper {
+   display: flex;
+   flex-direction: column;
+   gap: 6px;
+   width: 120px;
+}
+
+.previewWrapper {
+   position: relative;
+   width: 120px;
+   height: 140px;
+   border-radius: 6px;
+   overflow: hidden;
+}
+
+.previewImage {
+   width: 100%;
+   height: 100%;
+   object-fit: cover;
+   border-radius: 6px;
+   border: 1px solid #444;
+   display: block;
+}
+
+/* Кнопка удаления — маленький крестик в правом верхнем углу */
+.removeImageButton {
+   position: absolute;
+   top: 4px;
+   right: 4px;
+   width: 22px;
+   height: 22px;
+   background-color: rgba(238, 77, 49, 0.9);
+   border: none;
+   border-radius: 50%;
+   color: #fff;
+   font-size: 16px;
+   line-height: 1;
+   cursor: pointer;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   padding: 0;
+   transition: background-color 0.3s;
+}
+
+.removeImageButton:hover {
+   background-color: #ee4d31;
+}
+
+.editActions {
+   display: flex;
+   gap: 14px;
+   justify-content: flex-end;
+   margin-top: 12px;
+}
+
+.editActions button {
+   width: 36px;
+   height: 36px;
+   padding: 0;
+   background: #ee4d31;
+   border-radius: 6px;
+   color: #1e1e1e;
+   font-size: 18px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   cursor: pointer;
+   transition: background 0.3s;
+}
+
+.editActions button:hover {
+   background: #ff6548;
+}
+
+.priceBlock {
+   display: flex;
+   align-items: center;
+   gap: 10px;
+   margin-top: 4px;
+}
+
+.oldPrice {
+   text-decoration: line-through;
+   color: #888;
+   font-size: 1rem;
+}
+
+.newPrice {
+   color: #4caf50;
+   font-weight: bold;
+   font-size: 1rem;
+}
+
+.discountTag {
+   background-color: #ff4d4f;
+   color: white;
+   font-size: 0.75rem;
+   font-weight: bold;
+   padding: 2px 6px;
+   border-radius: 4px;
+   line-height: 1;
+}
+
+/* --- Адаптив --- */
+@media (max-width: 640px) {
+   .editMode {
+      max-height: none;
+      padding: 10px;
+   }
+
+   .editForm {
+      gap: 10px;
+      font-size: 13px;
+   }
+
+   .editForm input[type="text"],
+   .editForm input[type="number"],
+   .editForm textarea {
+      font-size: 13px;
+   }
+
+   .radioGroup,
+   .checkboxGroup {
+      gap: 8px;
+   }
+
+   .imageInputWrapper {
+      width: 100px;
+   }
+
+   .previewImage {
+      width: 100px;
+      height: 120px;
+   }
+
+   .editActions {
+      gap: 10px;
+   }
+
+   .editActions button {
+      font-size: 14px;
+      padding: 6px 10px;
+   }
 }

@@ -6,6 +6,7 @@ const API_URL = 'http://localhost:10000/api/products';
 
 const ProductsTab = () => {
    const [products, setProducts] = useState([]);
+   const [productToDelete, setProductToDelete] = useState(null);
 
    const fetchProducts = async () => {
       try {
@@ -36,13 +37,22 @@ const ProductsTab = () => {
       }
    };
 
-   const handleDeleteProduct = async (id) => {
+   const confirmDeleteProduct = (id) => {
+      setProductToDelete(id);
+   };
+
+   const handleCancelDelete = () => {
+      setProductToDelete(null);
+   };
+
+   const handleConfirmDelete = async () => {
       try {
-         const response = await fetch(`${API_URL}/${id}`, {
+         const response = await fetch(`${API_URL}/${productToDelete}`, {
             method: 'DELETE'
          });
          if (response.ok) {
-            setProducts(products.filter(p => p.id !== id));
+            setProducts(products.filter(p => p.id !== productToDelete));
+            setProductToDelete(null);
          }
       } catch (error) {
          console.error('Error deleting product:', error);
@@ -56,9 +66,21 @@ const ProductsTab = () => {
                key={product.id}
                product={product}
                onSave={handleUpdateProduct}
-               onDelete={handleDeleteProduct}
+               onDelete={() => confirmDeleteProduct(product.id)}
             />
          ))}
+
+         {productToDelete !== null && (
+            <div className={styles.modalOverlay}>
+               <div className={styles.modal}>
+                  <p>Դուք վստահ եք, որ ցանկանում եք ջնջել այս ապրանքը՞</p>
+                  <div className={styles.modalButtons}>
+                     <button onClick={handleConfirmDelete} className={styles.button}>Այո, ջնջել</button>
+                     <button onClick={handleCancelDelete} className={styles.buttonCancel}>Ոչ</button>
+                  </div>
+               </div>
+            </div>
+         )}
       </div>
    );
 };

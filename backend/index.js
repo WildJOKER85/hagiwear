@@ -32,6 +32,7 @@ app.use(morgan('dev'));
 // Статика для картинок
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
+
 // Роуты API
 app.use('/api/product-images', productImagesRouter);
 
