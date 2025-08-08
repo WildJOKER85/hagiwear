@@ -10,6 +10,24 @@ const COLORS = [
    { value: 'green', label: 'Կանաչ' },
 ];
 
+const COLOR_ID_MAP = {
+   white: 1,
+   black: 2,
+   red: 3,
+   blue: 4,
+   yellow: 5,
+   green: 6,
+};
+
+const SIZE_ID_MAP = {
+   XS: 1,
+   S: 2,
+   M: 3,
+   L: 4,
+   XL: 5,
+   XXL: 6,
+};
+
 const AddProductForm = ({ onProductAdded }) => {
    const [formData, setFormData] = useState({
       name: '',
@@ -49,6 +67,10 @@ const AddProductForm = ({ onProductAdded }) => {
          return;
       }
 
+      const colorId = COLOR_ID_MAP[formData.color];
+      const sizeId = SIZE_ID_MAP[formData.size];
+      const quantity = Number(formData.stock);
+
       // Находим армянский лейбл цвета
       const colorLabel = COLORS.find(c => c.value === formData.color)?.label || '';
       // Формируем финальное имя с цветом (но в UI поле не меняем)
@@ -59,9 +81,10 @@ const AddProductForm = ({ onProductAdded }) => {
       data.append('description', formData.description.trim());
       data.append('price', formData.price);
       data.append('discount', formData.discount || '0');
-      data.append('stock', formData.stock || '0');
-      data.append('colors', formData.color);
-      data.append('sizes', formData.size);
+
+      data.append('color_id', colorId);
+      data.append('size_id', sizeId);
+      data.append('quantity', quantity);
 
       if (formData.mainImage) data.append('images', formData.mainImage);
       if (formData.thumbnail1) data.append('images', formData.thumbnail1);
@@ -76,11 +99,8 @@ const AddProductForm = ({ onProductAdded }) => {
          if (!res.ok) throw new Error(`Ошибка ${res.status}`);
 
          const result = await res.json();
-         console.log('🟢 Добавлено:', result);
-
          if (onProductAdded) onProductAdded(result);
 
-         // Сброс формы после успешного добавления
          setFormData({
             name: '',
             description: '',

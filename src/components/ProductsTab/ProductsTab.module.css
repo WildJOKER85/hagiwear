@@ -121,6 +121,62 @@
    background-color: #666;
 }
 
+.innerTabs {
+   display: flex;
+   gap: 16px;
+   margin-bottom: 12px;
+}
+
+.innerTabs button {
+   background: none;
+   border: none;
+   color: var(--color-white);
+   font-weight: 600;
+   padding: 8px 16px;
+   cursor: pointer;
+   border-bottom: 2px solid transparent;
+   transition: border-color 0.3s;
+}
+
+.innerTabs button:hover {
+   border-color: var(--color-primary);
+}
+
+.innerTabs button.activeTab {
+   border-color: var(--color-primary);
+   font-weight: 700;
+}
+
+.innerContent {
+   display: flex;
+   gap: 16px;
+}
+
+.productsGrid {
+   flex: 1;
+   display: grid;
+   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+   gap: 16px;
+}
+
+.filterPanel {
+   width: 320px;
+   background-color: #1f1f1f;
+   border-radius: 8px;
+   padding: 16px;
+   color: var(--color-white);
+   /* Можно добавить плавное появление */
+   transition: transform 0.3s ease;
+}
+
+.categorySubtitle {
+   margin-top: 24px;
+   font-size: 1rem;
+   font-weight: 600;
+   color: var(--color-primary);
+   text-align: center;
+}
+
 
 /* Адаптив */
 @media (max-width: 500px) {
