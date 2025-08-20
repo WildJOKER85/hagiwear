@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { FaSave, FaTimes, FaPen } from 'react-icons/fa';
 import styles from './ProductCardEditable.module.css';
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:10000";
+
 const COLORS = [
    { id: 1, value: 'white', label: 'Սպիտակ' },
    { id: 2, value: 'black', label: 'Սեւ' },
@@ -38,9 +40,12 @@ const ProductCardEditable = ({ product, onSave, onDelete }) => {
       mainImageFile: null,
       thumb1File: null,
       thumb2File: null,
-      main_image_url: null,
+      mainImage_url: null,
       thumb1_url: null,
       thumb2_url: null,
+      mainImageDeleted: false,
+      thumb1Deleted: false,
+      thumb2Deleted: false,
    });
 
    // Рефы для input file, чтобы сбрасывать value
@@ -48,164 +53,176 @@ const ProductCardEditable = ({ product, onSave, onDelete }) => {
    const thumb1InputRef = useRef(null);
    const thumb2InputRef = useRef(null);
 
-   // Функция для копирования данных из product в formData
+   const getImageSrc = (url) => {
+      if (!url) return "/no-image.png";
+
+      // Если blob: (локальное превью) — возвращаем как есть
+      if (url.startsWith("blob:")) return url;
+
+      // Если начинается с /images/... → добавляем API_URL
+      if (url.startsWith("/images")) return `${API_URL}${url}`;
+
+      // На всякий случай возвращаем как есть
+      return url;
+   };
+
+
+   // 🔹 Инициализация / сброс формы
    const resetFormData = useCallback(() => {
-      setFormData({
+      if (!product) return;
+
+      setFormData(prev => ({
          name: product.name || '',
          description: product.description || '',
          price: product.price || 0,
          discount: product.discount || 0,
          stock: 0,
-         color: null,
-         size: null,
-         mainImageFile: null,
-         thumb1File: null,
-         thumb2File: null,
-         main_image_url: product.main_image || null,
-         thumb1_url: product.thumb1 || null,
-         thumb2_url: product.thumb2 || null,
-      });
-      setStockList([]);
-      if (mainImageInputRef.current) mainImageInputRef.current.value = '';
-      if (thumb1InputRef.current) thumb1InputRef.current.value = '';
-      if (thumb2InputRef.current) thumb2InputRef.current.value = '';
+         color: product.color || null,
+         size: product.size || null,
+
+         // Если были локальные файлы — оставляем их
+         mainImageFile: prev?.mainImageFile || null,
+         thumb1File: prev?.thumb1File || null,
+         thumb2File: prev?.thumb2File || null,
+
+         // Превью оставляем если есть локальные файлы, иначе берем с сервера
+         mainImage_url: prev?.mainImageFile ? prev.mainImage_url : product.main_image || null,
+         thumb1_url: prev?.thumb1File ? prev.thumb1_url : product.thumb1 || null,
+         thumb2_url: prev?.thumb2File ? prev.thumb2_url : product.thumb2 || null,
+
+         mainImageDeleted: prev?.mainImageDeleted || false,
+         thumb1Deleted: prev?.thumb1Deleted || false,
+         thumb2Deleted: prev?.thumb2Deleted || false,
+      }));
+
+      console.log("🔄 [resetFormData] formData сброшен:", product);
    }, [product]);
 
-   // При смене товара или открытии редактирования — копируем данные
+   const fetchStock = useCallback(async () => {
+      if (!product?.id) return;
+      try {
+         const res = await fetch(`http://localhost:10000/api/stock/${product.id}`);
+         if (!res.ok) throw new Error(`Ошибка ${res.status}`);
+         const data = await res.json();
+         setStockList(data || []);
+         if (data.length) {
+            const color = product.color || data[0].color_id;
+            const size = product.size || data[0].size_id;
+            const found = data.find(s => s.color_id === color && s.size_id === size);
+            setFormData(prev => ({
+               ...prev,
+               stock: found ? found.quantity : 0,
+               color,
+               size,
+            }));
+         }
+      } catch (e) {
+         console.error('Ошибка подгрузки склада:', e);
+         setStockList([]);
+      }
+   }, [product]);
+
    useEffect(() => {
       if (product?.id) {
          resetFormData();
-
-         // Подгрузка склада (stock)
-         async function fetchStock() {
-            try {
-               const res = await fetch(`http://localhost:10000/api/stock/${product.id}`);
-               if (!res.ok) throw new Error(`Ошибка ${res.status}`);
-
-               const data = await res.json();
-               setStockList(data);
-
-               if (data.length > 0) {
-                  setFormData(prev => ({
-                     ...prev,
-                     color: data[0].color_id,
-                     size: data[0].size_id,
-                     stock: data[0].quantity,
-                  }));
-               }
-            } catch (e) {
-               console.error(e);
-               setStockList([]);
-            }
-         }
          fetchStock();
       }
-   }, [product, resetFormData]);
+   }, [product, resetFormData, fetchStock]);
 
-   // При изменении цвета/размера обновлять количество
    useEffect(() => {
-      if (formData.color && formData.size) {
+      if (formData.color && formData.size && stockList.length > 0) {
          const found = stockList.find(
             s => s.color_id === formData.color && s.size_id === formData.size
          );
-         setFormData(prev => ({
-            ...prev,
-            stock: found ? found.quantity : 0,
-         }));
+         if (found) setFormData(prev => ({ ...prev, stock: found.quantity }));
       }
    }, [formData.color, formData.size, stockList]);
 
    const handleInputChange = e => {
       const { name, value, type } = e.target;
-      if (type === 'radio' && name === 'color') {
-         setFormData(prev => ({ ...prev, color: Number(value) }));
-      } else if (type === 'radio' && name === 'size') {
-         setFormData(prev => ({ ...prev, size: Number(value) }));
-      } else {
-         setFormData(prev => ({ ...prev, [name]: value }));
-      }
+      if (type === 'radio' && name === 'color') setFormData(prev => ({ ...prev, color: Number(value) }));
+      else if (type === 'radio' && name === 'size') setFormData(prev => ({ ...prev, size: Number(value) }));
+      else setFormData(prev => ({ ...prev, [name]: value }));
    };
 
    const handleFileChange = e => {
       const { name, files } = e.target;
-      if (!files?.length) {
-         console.log('📭 handleFileChange: файлы отсутствуют');
-         return;
-      }
-
+      if (!files?.length) return;
       const file = files[0];
+      const key = name.replace("File", "");
       const previewUrl = URL.createObjectURL(file);
-
-      console.log(`📤 handleFileChange: выбран файл для поля "${name}"`, file);
-
-      // вычисляем имя поля URL
-      const urlField = name.replace('File', '_url');
 
       setFormData(prev => ({
          ...prev,
-         [name]: file,
-         [urlField]: previewUrl,
+         [name]: file,          // локальный File
+         [key + "_url"]: previewUrl, // preview
+         [key + "Deleted"]: false,   // сбрасываем флаг удаления
       }));
 
-      console.log('🧩 formData после изменения: ', {
-         ...formData,
-         [name]: file,
-         [urlField]: previewUrl,
-      });
+      console.log(`🖼 [handleFileChange] ${key} загружен`, { file, previewUrl });
    };
 
    const handleRemoveImage = field => {
-      console.log(`handleRemoveImage вызван для поля: ${field}`);
-
       setFormData(prev => ({
          ...prev,
-         [field + '_url']: null,
          [field + 'File']: null,
+         [field + '_url']: null,
+         [field + 'Deleted']: true,
       }));
 
-      const refMap = {
-         main_image: mainImageInputRef,
-         thumb1: thumb1InputRef,
-         thumb2: thumb2InputRef,
-      };
+      // Сбрасываем input через ref
+      if (field === 'mainImage' && mainImageInputRef.current) mainImageInputRef.current.value = '';
+      if (field === 'thumb1' && thumb1InputRef.current) thumb1InputRef.current.value = '';
+      if (field === 'thumb2' && thumb2InputRef.current) thumb2InputRef.current.value = '';
 
-      const inputRef = refMap[field];
-      if (inputRef?.current) {
-         console.log(`Сбрасываю ${field} inputRef.value`);
-         inputRef.current.value = '';
-      } else {
-         console.log('Нет рефа для этого поля или поле не совпало');
-      }
-
-      // Форсируем обновление input, чтобы можно было выбрать тот же файл
+      // Обновляем ключ input, чтобы React пересоздал элемент
       setFileInputKey(Date.now());
+
+      console.log(`🗑 [handleRemoveImage] вызван для поля: ${field}`);
    };
-
-
    // При отмене редактирования — откатываем состояние
    const handleCancel = () => {
       resetFormData();
       setMode('collapsed');
    };
 
-   const handleSubmit = e => {
+   const handleSubmit = async e => {
       e.preventDefault();
+      try {
+         const updatedProduct = await onSave(product?.id, formData);
 
-      onSave(product.id, {
-         name: formData.name,
-         description: formData.description,
-         price: Number(formData.price),
-         discount: Number(formData.discount),
-         color_id: Number(formData.color),
-         size_id: Number(formData.size),
-         quantity: Number(formData.stock),
-         mainImageFile: formData.mainImageFile,
-         thumb1File: formData.thumb1File,
-         thumb2File: formData.thumb2File,
-      });
+         if (updatedProduct) {
+            setFormData(prev => ({
+               ...prev,
+               name: updatedProduct.name || prev.name,
+               description: updatedProduct.description || prev.description,
+               price: updatedProduct.price || prev.price,
+               discount: updatedProduct.discount || prev.discount,
+               stock: updatedProduct.stock || prev.stock,
 
-      setMode('collapsed');
+               // сохраняем локальные preview, если файл не был изменён
+               mainImage_url: prev.mainImageFile ? prev.mainImage_url : updatedProduct.main_image || prev.mainImage_url,
+               thumb1_url: prev.thumb1File ? prev.thumb1_url : updatedProduct.thumb1 || prev.thumb1_url,
+               thumb2_url: prev.thumb2File ? prev.thumb2_url : updatedProduct.thumb2 || prev.thumb2_url,
+
+               mainImageFile: null,
+               thumb1File: null,
+               thumb2File: null,
+
+               mainImageDeleted: false,
+               thumb1Deleted: false,
+               thumb2Deleted: false,
+            }));
+            setMode('collapsed');
+         }
+      } catch (err) {
+         console.error("❌ Ошибка при сохранении:", err);
+      }
    };
+
+   useEffect(() => {
+      console.log('📥 formData обновился:', formData);
+   }, [formData]);
 
    if (mode === 'edit') {
       return (
@@ -312,27 +329,25 @@ const ProductCardEditable = ({ product, onSave, onDelete }) => {
                <fieldset>
                   <legend>Նկարներ</legend>
                   <div className={styles.imagesGroup}>
-                     {['main_image', 'thumb1', 'thumb2'].map(field => (
-                        <div key={field} className={styles.imageInputWrapper}>
-                           <label>
-                              {field === 'main_image'
-                                 ? 'Գլխավոր նկարը'
-                                 : field === 'thumb1'
-                                    ? 'Լրացուցիչ 1'
-                                    : 'Լրացուցիչ 2'}
-                           </label>
+                     {[
+                        { key: 'mainImage', label: 'Գլխավոր նկարը', ref: mainImageInputRef },
+                        { key: 'thumb1', label: 'Լրացուցիչ 1', ref: thumb1InputRef },
+                        { key: 'thumb2', label: 'Լրացուցիչ 2', ref: thumb2InputRef },
+                     ].map(({ key, label, ref }) => (
+                        <div key={key} className={styles.imageInputWrapper}>
+                           <label>{label}</label>
 
-                           {formData[field + '_url'] ? (
+                           {formData[key + '_url'] ? (
                               <div className={styles.previewWrapper}>
                                  <img
-                                    src={formData[field + '_url']}
-                                    alt={`${field} preview`}
+                                    src={getImageSrc(formData[key + '_url'])}
+                                    alt={`${key} preview`}
                                     className={styles.previewImage}
                                  />
                                  <button
                                     type="button"
                                     className={styles.removeImageButton}
-                                    onClick={() => handleRemoveImage(field)}
+                                    onClick={() => handleRemoveImage(key)}
                                     title="Ջնջել նկարը"
                                  >
                                     x
@@ -341,19 +356,13 @@ const ProductCardEditable = ({ product, onSave, onDelete }) => {
                            ) : null}
 
                            <input
-                              key={fileInputKey + field}
+                              key={fileInputKey + key}
                               type="file"
                               accept="image/*"
-                              name={field + 'File'}
+                              name={key + 'File'}
                               onChange={handleFileChange}
                               className={styles.inpImg}
-                              ref={
-                                 field === 'main_image'
-                                    ? mainImageInputRef
-                                    : field === 'thumb1'
-                                       ? thumb1InputRef
-                                       : thumb2InputRef
-                              }
+                              ref={ref}
                            />
                         </div>
                      ))}
@@ -376,9 +385,9 @@ const ProductCardEditable = ({ product, onSave, onDelete }) => {
    if (mode === 'expanded') {
       return (
          <div className={`${styles.card} ${styles.expanded}`}>
-            {formData.main_image_url && (
+            {formData.mainImage_url && (
                <img
-                  src={formData.main_image_url}
+                  src={getImageSrc(formData.mainImage_url)}
                   alt={formData.name}
                   className={styles.image}
                />
@@ -420,16 +429,14 @@ const ProductCardEditable = ({ product, onSave, onDelete }) => {
          </div>
       );
    }
-
+   console.log('Фото Брокен' + formData.mainImage_url);
    return (
       <div className={styles.card}>
-         {formData.main_image_url && (
-            <img
-               src={formData.main_image_url || '/no-image.png'}
-               alt={formData.name}
-               className={styles.image}
-            />
-         )}
+         <img
+            src={getImageSrc(formData.mainImage_url)}
+            alt={formData.name}
+            className={styles.image}
+         />
          <div className={styles.info}>
             <h4>{formData.name}</h4>
             <div className={styles.priceBlock}>

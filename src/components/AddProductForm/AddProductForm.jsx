@@ -44,26 +44,19 @@ const AddProductForm = ({ onProductAdded }) => {
 
    const handleChange = (e) => {
       const { name, value } = e.target;
-      setFormData(prev => ({
-         ...prev,
-         [name]: value,
-      }));
+      setFormData(prev => ({ ...prev, [name]: value }));
    };
 
-   // Для файлов
    const handleFileChange = (e, field) => {
       const file = e.target.files[0];
-      setFormData(prev => ({
-         ...prev,
-         [field]: file || null,
-      }));
+      setFormData(prev => ({ ...prev, [field]: file || null }));
    };
 
    const handleSubmit = async (e) => {
       e.preventDefault();
 
-      if (!formData.stock || Number(formData.stock) < 1) {
-         alert('Խնդրում ենք նշել քանակը (պահեստում)՝ նվազագույնը 1։');
+      if (!formData.name || !formData.price || !formData.color || !formData.size || !formData.stock) {
+         alert('Խնդրում ենք լրացնել բոլոր պարտադիր դաշտերը։');
          return;
       }
 
@@ -71,9 +64,7 @@ const AddProductForm = ({ onProductAdded }) => {
       const sizeId = SIZE_ID_MAP[formData.size];
       const quantity = Number(formData.stock);
 
-      // Находим армянский лейбл цвета
       const colorLabel = COLORS.find(c => c.value === formData.color)?.label || '';
-      // Формируем финальное имя с цветом (но в UI поле не меняем)
       const finalName = formData.name.trim() + (colorLabel ? ` ${colorLabel}` : '');
 
       const data = new FormData();
@@ -81,14 +72,13 @@ const AddProductForm = ({ onProductAdded }) => {
       data.append('description', formData.description.trim());
       data.append('price', formData.price);
       data.append('discount', formData.discount || '0');
-
       data.append('color_id', colorId);
       data.append('size_id', sizeId);
       data.append('quantity', quantity);
 
-      if (formData.mainImage) data.append('images', formData.mainImage);
-      if (formData.thumbnail1) data.append('images', formData.thumbnail1);
-      if (formData.thumbnail2) data.append('images', formData.thumbnail2);
+      if (formData.mainImage) data.append('main_image', formData.mainImage);
+      if (formData.thumbnail1) data.append('thumb1', formData.thumbnail1);
+      if (formData.thumbnail2) data.append('thumb2', formData.thumbnail2);
 
       try {
          const res = await fetch('http://localhost:10000/api/products', {
@@ -97,10 +87,11 @@ const AddProductForm = ({ onProductAdded }) => {
          });
 
          if (!res.ok) throw new Error(`Ошибка ${res.status}`);
-
          const result = await res.json();
+
          if (onProductAdded) onProductAdded(result);
 
+         // Сбрасываем форму
          setFormData({
             name: '',
             description: '',
@@ -113,20 +104,20 @@ const AddProductForm = ({ onProductAdded }) => {
             thumbnail1: null,
             thumbnail2: null,
          });
+
       } catch (err) {
-         console.error('🔴 Ошибка при добавлении:', err);
+         console.error('🔴 Ошибка при добавлении товара:', err);
       }
    };
 
    return (
       <form onSubmit={handleSubmit} className={styles.form}>
-
          <label htmlFor="name">Անուն</label>
          <input
             type="text"
             id="name"
             name="name"
-            value={formData.name ?? ''}
+            value={formData.name}
             onChange={handleChange}
             required
          />
@@ -135,7 +126,7 @@ const AddProductForm = ({ onProductAdded }) => {
          <textarea
             id="description"
             name="description"
-            value={formData.description ?? ''}
+            value={formData.description}
             onChange={handleChange}
             rows={2}
          />
@@ -146,7 +137,7 @@ const AddProductForm = ({ onProductAdded }) => {
                type="number"
                id="stock"
                name="stock"
-               value={formData.stock ?? ''}
+               value={formData.stock}
                onChange={handleChange}
                min="0"
                required
@@ -158,7 +149,7 @@ const AddProductForm = ({ onProductAdded }) => {
             type="number"
             id="price"
             name="price"
-            value={formData.price ?? ''}
+            value={formData.price}
             onChange={handleChange}
             required
             min="0"
@@ -169,7 +160,7 @@ const AddProductForm = ({ onProductAdded }) => {
             type="number"
             id="discount"
             name="discount"
-            value={formData.discount ?? ''}
+            value={formData.discount}
             onChange={handleChange}
             min="0"
             max="100"
@@ -201,8 +192,7 @@ const AddProductForm = ({ onProductAdded }) => {
                {COLORS.map(({ value }) => (
                   <label
                      key={value}
-                     className={`${styles.colorCircle} ${styles[value]} ${formData.color === value ? styles.selected : ''
-                        }`}
+                     className={`${styles.colorCircle} ${styles[value]} ${formData.color === value ? styles.selected : ''}`}
                   >
                      <input
                         type="radio"
@@ -218,51 +208,25 @@ const AddProductForm = ({ onProductAdded }) => {
 
          <div className={styles.imageUploadSection}>
             <label>Գլխավոր նկար</label>
-            <input
-               type="file"
-               accept="image/*"
-               onChange={(e) => handleFileChange(e, 'mainImage')}
-            />
+            <input type="file" accept="image/*" onChange={(e) => handleFileChange(e, 'mainImage')} />
             {formData.mainImage && (
-               <img
-                  src={URL.createObjectURL(formData.mainImage)}
-                  alt="Main preview"
-                  className={styles.previewImage}
-               />
+               <img src={URL.createObjectURL(formData.mainImage)} alt="Main preview" className={styles.previewImage} />
             )}
 
             <label>Լրացուցիչ 1</label>
-            <input
-               type="file"
-               accept="image/*"
-               onChange={(e) => handleFileChange(e, 'thumbnail1')}
-            />
+            <input type="file" accept="image/*" onChange={(e) => handleFileChange(e, 'thumbnail1')} />
             {formData.thumbnail1 && (
-               <img
-                  src={URL.createObjectURL(formData.thumbnail1)}
-                  alt="Thumb 1"
-                  className={styles.previewImage}
-               />
+               <img src={URL.createObjectURL(formData.thumbnail1)} alt="Thumb 1" className={styles.previewImage} />
             )}
 
             <label>Լրացուցիչ 2</label>
-            <input
-               type="file"
-               accept="image/*"
-               onChange={(e) => handleFileChange(e, 'thumbnail2')}
-            />
+            <input type="file" accept="image/*" onChange={(e) => handleFileChange(e, 'thumbnail2')} />
             {formData.thumbnail2 && (
-               <img
-                  src={URL.createObjectURL(formData.thumbnail2)}
-                  alt="Thumb 2"
-                  className={styles.previewImage}
-               />
+               <img src={URL.createObjectURL(formData.thumbnail2)} alt="Thumb 2" className={styles.previewImage} />
             )}
          </div>
 
-         <button type="submit" className={styles.addButton}>
-            Ավելացնել ապրանք
-         </button>
+         <button type="submit" className={styles.addButton}>Ավելացնել ապրանք</button>
       </form>
    );
 };
