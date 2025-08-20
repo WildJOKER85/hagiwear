@@ -78,10 +78,14 @@ const ProductsTab = () => {
    const handleSaveProduct = async (productId, formData) => {
       try {
          const data = new FormData();
+
          data.append("name", formData.name);
          data.append("description", formData.description);
          data.append("price", formData.price);
          data.append("discount", formData.discount);
+         data.append("color_id", formData.color);
+         data.append("size_id", formData.size);
+         data.append("quantity", formData.stock);
 
          if (formData.mainImageFile) data.append("mainImageFile", formData.mainImageFile);
          if (formData.thumb1File) data.append("thumb1File", formData.thumb1File);
@@ -100,7 +104,9 @@ const ProductsTab = () => {
                console.log("   📝", key, "=", value);
             }
          }
-
+         console.log('data_SIze', data);
+         console.log('data_SIze', data.entries());
+         console.log('ФормДАТА', formData);
          const response = await fetch(
             productId ? `${API_URL}/${productId}` : API_URL,
             {

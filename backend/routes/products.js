@@ -176,10 +176,10 @@ router.put('/:id', upload.fields([
       // 2️⃣ Обновляем склад
       if (color_id && size_id && quantity !== undefined) {
          await db.query(
-            `INSERT INTO product_stock_new (product_id, color_id, size_id, quantity) 
-             VALUES (?, ?, ?, ?) 
-             ON DUPLICATE KEY UPDATE quantity=?`,
-            [productId, color_id, size_id, quantity, quantity]
+            `UPDATE product_stock_new 
+             SET color_id=?, size_id=?, quantity=?
+             WHERE product_id=?`,
+            [color_id, size_id, quantity, productId]
          );
       }
 

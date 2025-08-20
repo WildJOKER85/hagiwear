@@ -156,7 +156,7 @@ const ProductCardEditable = ({ product, onSave, onDelete }) => {
          ...prev,
          [name]: file,          // локальный File
          [key + "_url"]: previewUrl, // preview
-         [key + "Deleted"]: false,   // сбрасываем флаг удаления
+         // [key + "Deleted"]: false,   // сбрасываем флаг удаления
       }));
 
       console.log(`🖼 [handleFileChange] ${key} загружен`, { file, previewUrl });
@@ -189,6 +189,7 @@ const ProductCardEditable = ({ product, onSave, onDelete }) => {
    const handleSubmit = async e => {
       e.preventDefault();
       try {
+         console.log('size-FormData', formData);
          const updatedProduct = await onSave(product?.id, formData);
 
          if (updatedProduct) {
@@ -209,9 +210,9 @@ const ProductCardEditable = ({ product, onSave, onDelete }) => {
                thumb1File: null,
                thumb2File: null,
 
-               mainImageDeleted: false,
-               thumb1Deleted: false,
-               thumb2Deleted: false,
+               // mainImageDeleted: false,
+               // thumb1Deleted: false,
+               // thumb2Deleted: false,
             }));
             setMode('collapsed');
          }
