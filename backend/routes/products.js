@@ -32,22 +32,92 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // -------------------------------------------
-// GET все товары с картинками и stock
+// GET все товары с картинками и stock с поддержкой фильтров
 router.get('/', async (req, res) => {
    try {
+      const {
+         name,
+         color_id,
+         size_id,
+         discount_only,
+         price_min,
+         price_max,
+         created_from,
+         created_to,
+         updated_from,
+         updated_to
+      } = req.query;
+
+      const conditions = [];
+      const values = [];
+
+      // --- Цены ---
+      let minPrice = price_min ? parseFloat(price_min) : null;
+      let maxPrice = price_max ? parseFloat(price_max) : null;
+      if (minPrice !== null && maxPrice !== null && minPrice > maxPrice) {
+         [minPrice, maxPrice] = [maxPrice, minPrice];
+      }
+      if (minPrice !== null) {
+         conditions.push(`p.price >= ?`);
+         values.push(minPrice);
+      }
+      if (maxPrice !== null) {
+         conditions.push(`p.price <= ?`);
+         values.push(maxPrice);
+      }
+
+      // --- Фильтры по имени, цвету, размеру, скидке ---
+      if (name) {
+         conditions.push(`p.name LIKE ?`);
+         values.push(`%${name}%`);
+      }
+      if (color_id) {
+         conditions.push(`EXISTS (SELECT 1 FROM product_stock_new ps WHERE ps.product_id = p.id AND ps.color_id = ? )`);
+         values.push(color_id);
+      }
+      if (size_id) {
+         conditions.push(`EXISTS (SELECT 1 FROM product_stock_new ps WHERE ps.product_id = p.id AND ps.size_id = ? )`);
+         values.push(size_id);
+      }
+      if (discount_only === 'true') {
+         conditions.push(`p.discount > 0`);
+      }
+
+      // --- Фильтры по дате добавления ---
+      if (created_from) {
+         conditions.push(`p.created_at >= ?`);
+         values.push(`${created_from} 00:00:00`);
+      }
+      if (created_to) {
+         conditions.push(`p.created_at <= ?`);
+         values.push(`${created_to} 23:59:59`);
+      }
+
+      // --- Фильтры по дате изменения (авто по времени) ---
+      if (updated_from) {
+         conditions.push(`p.updated_at >= ?`);
+         values.push(`${updated_from} 00:00:00`);
+      }
+      if (updated_to) {
+         conditions.push(`p.updated_at <= ?`);
+         values.push(`${updated_to} 23:59:59`);
+      }
+
+      const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+
       const [products] = await db.query(`
-         SELECT p.id, p.name, p.description, p.price, p.discount, p.created_at,
+         SELECT p.id, p.name, p.description, p.price, p.discount, p.created_at, p.updated_at,
             (SELECT pi.image_url FROM product_images pi WHERE pi.product_id = p.id AND pi.image_type='main' LIMIT 1) AS main_image,
             (SELECT pi.image_url FROM product_images pi WHERE pi.product_id = p.id AND pi.image_type='thumb1' LIMIT 1) AS thumb1,
             (SELECT pi.image_url FROM product_images pi WHERE pi.product_id = p.id AND pi.image_type='thumb2' LIMIT 1) AS thumb2
          FROM products_new p
+         ${whereClause}
          ORDER BY p.created_at DESC
-      `);
+      `, values);
 
       const host = `${req.protocol}://${req.get('host')}`;
 
       const productsWithStock = await Promise.all(products.map(async (p) => {
-         // Получаем stock (цвет, размер, количество)
          const [stockRows] = await db.query(`
             SELECT ps.color_id, c.name AS color_name, c.label_armenian AS color_label,
                    ps.size_id, s.name AS size_name, ps.quantity
@@ -57,7 +127,6 @@ router.get('/', async (req, res) => {
             WHERE ps.product_id = ?
          `, [p.id]);
 
-         // Преобразуем пути картинок в полный URL
          const makeFullUrl = (url) => url ? `${host}${url}` : null;
 
          return {
@@ -251,6 +320,7 @@ router.put('/:id', upload.fields([
       res.status(500).json({ error: '❌ Ошибка при сохранении продукта' });
    }
 });
+
 // -------------------------------------------
 // Удаление товара с картинками
 router.delete('/:id', async (req, res) => {

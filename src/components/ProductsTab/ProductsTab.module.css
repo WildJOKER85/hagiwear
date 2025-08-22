@@ -72,6 +72,15 @@
    cursor: pointer;
 }
 
+.buttonsRow {
+   display: flex;
+   column-gap: 2rem;
+}
+
+.buttonsRow button:hover {
+   background-color: #ff6548;
+}
+
 .button:hover {
    background-color: #ff6548;
 }

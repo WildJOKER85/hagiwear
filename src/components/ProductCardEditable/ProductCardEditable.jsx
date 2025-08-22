@@ -66,7 +66,6 @@ const ProductCardEditable = ({ product, onSave, onDelete }) => {
       return url;
    };
 
-
    // 🔹 Инициализация / сброс формы
    const resetFormData = useCallback(() => {
       if (!product) return;
@@ -94,8 +93,6 @@ const ProductCardEditable = ({ product, onSave, onDelete }) => {
          thumb1Deleted: prev?.thumb1Deleted || false,
          thumb2Deleted: prev?.thumb2Deleted || false,
       }));
-
-      console.log("🔄 [resetFormData] formData сброшен:", product);
    }, [product]);
 
    const fetchStock = useCallback(async () => {
@@ -156,10 +153,7 @@ const ProductCardEditable = ({ product, onSave, onDelete }) => {
          ...prev,
          [name]: file,          // локальный File
          [key + "_url"]: previewUrl, // preview
-         // [key + "Deleted"]: false,   // сбрасываем флаг удаления
       }));
-
-      console.log(`🖼 [handleFileChange] ${key} загружен`, { file, previewUrl });
    };
 
    const handleRemoveImage = field => {
@@ -177,8 +171,6 @@ const ProductCardEditable = ({ product, onSave, onDelete }) => {
 
       // Обновляем ключ input, чтобы React пересоздал элемент
       setFileInputKey(Date.now());
-
-      console.log(`🗑 [handleRemoveImage] вызван для поля: ${field}`);
    };
    // При отмене редактирования — откатываем состояние
    const handleCancel = () => {
@@ -189,7 +181,6 @@ const ProductCardEditable = ({ product, onSave, onDelete }) => {
    const handleSubmit = async e => {
       e.preventDefault();
       try {
-         console.log('size-FormData', formData);
          const updatedProduct = await onSave(product?.id, formData);
 
          if (updatedProduct) {
@@ -209,10 +200,6 @@ const ProductCardEditable = ({ product, onSave, onDelete }) => {
                mainImageFile: null,
                thumb1File: null,
                thumb2File: null,
-
-               // mainImageDeleted: false,
-               // thumb1Deleted: false,
-               // thumb2Deleted: false,
             }));
             setMode('collapsed');
          }
@@ -220,10 +207,6 @@ const ProductCardEditable = ({ product, onSave, onDelete }) => {
          console.error("❌ Ошибка при сохранении:", err);
       }
    };
-
-   useEffect(() => {
-      console.log('📥 formData обновился:', formData);
-   }, [formData]);
 
    if (mode === 'edit') {
       return (
@@ -430,7 +413,7 @@ const ProductCardEditable = ({ product, onSave, onDelete }) => {
          </div>
       );
    }
-   console.log('Фото Брокен' + formData.mainImage_url);
+
    return (
       <div className={styles.card}>
          <img

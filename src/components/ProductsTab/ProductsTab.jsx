@@ -8,33 +8,37 @@ const API_URL = 'http://localhost:10000/api/products';
 const ProductsTab = () => {
    const [products, setProducts] = useState([]);
    const [activeInnerTab, setActiveInnerTab] = useState('all');
-   const [filters, setFilters] = useState({});
    const [productToDelete, setProductToDelete] = useState(null);
    const [loading, setLoading] = useState(false);
    const [error, setError] = useState(null);
+   const [pendingFilters, setPendingFilters] = useState({});
+   const [appliedFilters, setAppliedFilters] = useState({});
 
    const categoryName = 'Նոր անուն, նոր խոսք, նոր ձև';
 
-   const handleFilterChange = useCallback((newFilters) => setFilters(newFilters), []);
+   // Обновление фильтров из ProductsFilter
+   const handleFilterChange = useCallback((newFilters) => {
+      setPendingFilters(newFilters);
+   }, []);
 
-   const cleanFilters = (filters) => {
-      const result = {};
-      for (const key in filters) {
-         const value = filters[key];
-         if (typeof value === 'string' && value.trim() !== '') result[key] = value.trim();
-         else if (typeof value === 'boolean' && value) result[key] = value;
-         else if (value !== null && value !== undefined) result[key] = value;
-      }
-      return result;
+   // Применить фильтры по кнопке "Որոնել"
+   const applyFilters = () => {
+      setAppliedFilters({ ...pendingFilters });
    };
 
+   // Очистка фильтров по кнопке "Ջնջել"
+   const clearFilters = () => {
+      setPendingFilters({});
+      setAppliedFilters({});
+   };
+
+   // Загрузка товаров с фильтрами
    useEffect(() => {
       const fetchProducts = async () => {
          setLoading(true);
          setError(null);
          try {
-            const filtered = cleanFilters(filters);
-            const queryString = new URLSearchParams(filtered).toString();
+            const queryString = new URLSearchParams(appliedFilters).toString();
             const response = await fetch(`${API_URL}?${queryString}`);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
@@ -47,7 +51,6 @@ const ProductsTab = () => {
                thumb1: product.thumb1 || null,
                thumb2: product.thumb2 || null,
             }));
-            console.log('📦 Fetched products:', parsedProducts);
             setProducts(parsedProducts);
          } catch (err) {
             console.error('Error fetching products:', err);
@@ -58,11 +61,11 @@ const ProductsTab = () => {
          }
       };
       fetchProducts();
-   }, [filters]);
+   }, [appliedFilters]);
 
+   // Удаление продукта
    const confirmDeleteProduct = (id) => setProductToDelete(id);
    const handleCancelDelete = () => setProductToDelete(null);
-
    const handleConfirmDelete = async () => {
       try {
          const response = await fetch(`${API_URL}/${productToDelete}`, { method: 'DELETE' });
@@ -75,10 +78,10 @@ const ProductsTab = () => {
       }
    };
 
+   // Сохранение продукта
    const handleSaveProduct = async (productId, formData) => {
       try {
          const data = new FormData();
-
          data.append("name", formData.name);
          data.append("description", formData.description);
          data.append("price", formData.price);
@@ -95,18 +98,6 @@ const ProductsTab = () => {
          data.append("thumb1Deleted", formData.thumb1Deleted);
          data.append("thumb2Deleted", formData.thumb2Deleted);
 
-         // 🔍 Логируем FormData подробно
-         console.log(`💾 [handleSaveProduct] Отправка данных для product ${productId || "NEW"}`);
-         for (let [key, value] of data.entries()) {
-            if (value instanceof File) {
-               console.log("   📂", key, "=", value.name, `(size: ${value.size} bytes)`);
-            } else {
-               console.log("   📝", key, "=", value);
-            }
-         }
-         console.log('data_SIze', data);
-         console.log('data_SIze', data.entries());
-         console.log('ФормДАТА', formData);
          const response = await fetch(
             productId ? `${API_URL}/${productId}` : API_URL,
             {
@@ -115,21 +106,14 @@ const ProductsTab = () => {
             }
          );
 
-         console.log("📡 [handleSaveProduct] Ответ статус:", response.status);
-
          if (!response.ok) throw new Error("Ошибка при сохранении");
 
          const updatedProduct = await response.json();
-         console.log("✅ [handleSaveProduct] Обновлённый продукт от сервера:", updatedProduct);
 
-         // 🔹 Авто-обновление списка продуктов
-         setProducts(prev => {
-            if (productId) {
-               return prev.map(p => (p.id === productId ? { ...p, ...updatedProduct } : p));
-            } else {
-               return [...prev, updatedProduct];
-            }
-         });
+         setProducts(prev => productId
+            ? prev.map(p => (p.id === productId ? { ...p, ...updatedProduct } : p))
+            : [...prev, updatedProduct]
+         );
 
          return updatedProduct;
       } catch (error) {
@@ -155,7 +139,7 @@ const ProductsTab = () => {
             >
                Ֆիլտր
             </button>
-            {Object.keys(filters).length > 0 && !loading && (
+            {Object.keys(appliedFilters).length > 0 && !loading && (
                <p className={styles.filterApplied}>Ցուցադրված են ֆիլտրված արդյունքները</p>
             )}
          </div>
@@ -163,7 +147,19 @@ const ProductsTab = () => {
          <div className={styles.innerContent}>
             {(activeInnerTab === 'filter' || activeInnerTab === 'all') && (
                <div className={activeInnerTab === 'filter' ? styles.filterPanel : styles.productsGrid}>
-                  {activeInnerTab === 'filter' && <ProductsFilter onFilterChange={handleFilterChange} />}
+                  {activeInnerTab === 'filter' && (
+                     <div className={styles.filterPanel}>
+                        <ProductsFilter
+                           pendingFilters={pendingFilters}
+                           onFilterChange={handleFilterChange}
+                        />
+                        <div className={styles.buttonsRow}>
+                           <button type="button" onClick={applyFilters}>Որոնել</button>
+                           <button type="button" onClick={clearFilters}>Ջնջել</button>
+                        </div>
+                     </div>
+                  )}
+
                   {loading && <p>Загрузка товаров...</p>}
                   {error && <p style={{ color: 'red' }}>{error}</p>}
                   {!loading && !error && products.length === 0 && <p>Ապրանքներ չկան</p>}
