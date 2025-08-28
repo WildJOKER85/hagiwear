@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import styles from './AdminPage.module.css';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import ProductsTab from '../../components/ProductsTab/ProductsTab';
@@ -8,7 +9,19 @@ import NotificationsTab from '../../components/NotificationsTab/NotificationsTab
 import AddProductForm from '../../components/AddProductForm/AddProductForm';
 
 const AdminPage = () => {
+   const [searchParams, setSearchParams] = useSearchParams();
    const [activeTab, setActiveTab] = useState('products');
+
+   // Читаем URL при монтировании
+   useEffect(() => {
+      const tabFromUrl = searchParams.get('tab');
+      if (tabFromUrl) setActiveTab(tabFromUrl);
+   }, [searchParams]);
+
+   const handleTabChange = (tab) => {
+      setActiveTab(tab);
+      setSearchParams({ tab }); // Обновляем URL
+   };
 
    const renderContent = () => {
       switch (activeTab) {
@@ -29,7 +42,7 @@ const AdminPage = () => {
 
    return (
       <div className={styles.adminContainer}>
-         <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+         <Sidebar activeTab={activeTab} onTabChange={handleTabChange} />
          <div className={styles.contentContainer}>
             {renderContent()}
          </div>

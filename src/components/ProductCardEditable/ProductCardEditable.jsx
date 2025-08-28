@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { FaSave, FaTimes, FaPen } from 'react-icons/fa';
 import styles from './ProductCardEditable.module.css';
 
@@ -24,6 +25,8 @@ const sizeNameToId = {
 };
 
 const ProductCardEditable = ({ product, onSave, onDelete }) => {
+   const { id: routeId } = useParams();
+   const [searchParams, setSearchParams] = useSearchParams();
    const [mode, setMode] = useState('collapsed');
    const [stockList, setStockList] = useState([]);
    const [fileInputKey, setFileInputKey] = useState(Date.now());
@@ -119,6 +122,53 @@ const ProductCardEditable = ({ product, onSave, onDelete }) => {
       }
    }, [product]);
 
+   const handleView = () => {
+      setMode('expanded');
+      // Сохраняем текущие параметры, но добавляем tab=view и productId
+      const params = new URLSearchParams(searchParams);
+      params.set('tab', 'view');
+      params.set('productId', product.id);
+      setSearchParams(params);
+   };
+
+   const handleEdit = () => {
+      setMode('edit');
+      const params = new URLSearchParams(searchParams);
+      params.set('tab', 'edit');
+      params.set('productId', product.id);
+      setSearchParams(params);
+   };
+
+   const handleCollapse = () => {
+      setMode('collapsed');
+      // Возвращаемся на список продуктов (tab=all)
+      const params = new URLSearchParams(searchParams);
+      params.set('tab', 'all');
+      params.delete('productId'); // удаляем выделенный продукт
+      setSearchParams(params);
+   };
+
+   // Проверяем, совпадает ли routeId с product.id
+   useEffect(() => {
+      if (routeId && Number(routeId) === product?.id) {
+         setMode('expanded');
+      }
+   }, [routeId, product]);
+
+   // синхронизация при монтировании
+   useEffect(() => {
+      const tabFromUrl = searchParams.get('tab');
+      const productIdFromUrl = searchParams.get('productId');
+
+      if (tabFromUrl === 'view' && Number(productIdFromUrl) === product?.id) {
+         setMode('expanded');
+      } else if (tabFromUrl === 'edit' && Number(productIdFromUrl) === product?.id) {
+         setMode('edit');
+      } else {
+         setMode('collapsed');
+      }
+   }, [searchParams, product]);
+
    useEffect(() => {
       if (product?.id) {
          resetFormData();
@@ -173,10 +223,10 @@ const ProductCardEditable = ({ product, onSave, onDelete }) => {
       setFileInputKey(Date.now());
    };
    // При отмене редактирования — откатываем состояние
-   const handleCancel = () => {
-      resetFormData();
-      setMode('collapsed');
-   };
+   // const handleCancel = () => {
+   //    resetFormData();
+   //    setMode('collapsed');
+   // };
 
    const handleSubmit = async e => {
       e.preventDefault();
@@ -357,7 +407,7 @@ const ProductCardEditable = ({ product, onSave, onDelete }) => {
                   <button type="submit" title="Պահպանել">
                      <FaSave />
                   </button>
-                  <button type="button" onClick={handleCancel} title="Չեղարկել">
+                  <button type="button" onClick={handleCollapse} title="Չեղարկել">
                      <FaTimes />
                   </button>
                </div>
@@ -378,35 +428,22 @@ const ProductCardEditable = ({ product, onSave, onDelete }) => {
             )}
             <div className={styles.info}>
                <h3>{formData.name}</h3>
-               <p>
-                  <strong>Նկարագրություն:</strong> {formData.description}
-               </p>
-               <p>
-                  <strong>Գին:</strong> {formData.price} ֏
-               </p>
+               <p><strong>Նկարագրություն:</strong> {formData.description}</p>
+               <p><strong>Գին:</strong> {formData.price} ֏</p>
                {formData.discount > 0 && (
                   <p>
-                     <strong>Զեղչ: </strong> -{formData.discount}% →{' '}
-                     {Math.round(formData.price * (1 - formData.discount / 100))} ֏
+                     <strong>Զեղչ: </strong> -{formData.discount}% → {Math.round(formData.price * (1 - formData.discount / 100))} ֏
                   </p>
                )}
-               <p>
-                  <strong>Քանակ պահեստում:</strong> {formData.stock}
-               </p>
-               <p>
-                  <strong>Չափս:</strong> {''}{' '}
-                  {SIZES.find(s => sizeNameToId[s] === formData.size) || formData.size}
-               </p>
-               <p>
-                  <strong>Գույն:</strong>{' '}
-                  {COLORS.find(c => c.id === formData.color)?.label || formData.color}
-               </p>
+               <p><strong>Քանակ պահեստում:</strong> {formData.stock}</p>
+               <p><strong>Չափս:</strong> {SIZES.find(s => sizeNameToId[s] === formData.size) || formData.size}</p>
+               <p><strong>Գույն:</strong> {COLORS.find(c => c.id === formData.color)?.label || formData.color}</p>
             </div>
             <div className={`${styles.actions} ${styles.compactActions}`}>
-               <button onClick={() => setMode('edit')} title="Խմբագրել">
+               <button onClick={handleEdit}title="Խմբագրել">
                   <FaPen />
                </button>
-               <button onClick={() => setMode('collapsed')} title="Փակել">
+               <button onClick={handleCollapse} title="Փակել">
                   <FaTimes />
                </button>
             </div>
@@ -416,20 +453,14 @@ const ProductCardEditable = ({ product, onSave, onDelete }) => {
 
    return (
       <div className={styles.card}>
-         <img
-            src={getImageSrc(formData.mainImage_url)}
-            alt={formData.name}
-            className={styles.image}
-         />
+         <img src={getImageSrc(formData.mainImage_url)} alt={formData.name} className={styles.image} />
          <div className={styles.info}>
             <h4>{formData.name}</h4>
             <div className={styles.priceBlock}>
                {formData.discount > 0 ? (
                   <>
                      <span className={styles.oldPrice}>{formData.price} ֏</span>
-                     <span className={styles.newPrice}>
-                        {Math.round(formData.price * (1 - formData.discount / 100))} ֏
-                     </span>
+                     <span className={styles.newPrice}>{Math.round(formData.price * (1 - formData.discount / 100))} ֏</span>
                      <span className={styles.discountTag}>-{formData.discount}%</span>
                   </>
                ) : (
@@ -438,12 +469,16 @@ const ProductCardEditable = ({ product, onSave, onDelete }) => {
             </div>
          </div>
          <div className={styles.actions}>
-            <button onClick={() => setMode('expanded')} title="Դիտել">
-               <FaPen />
-            </button>
-            <button onClick={() => onDelete(product.id)} title="Ջնջել">
-               <FaTimes />
-            </button>
+            {mode === 'collapsed' && (
+               <div className={styles.actions}>
+                  <button onClick={handleView} title="Դիտել">
+                     <FaPen />
+                  </button>
+                  <button onClick={() => onDelete(product.id)} title="Ջնջել">
+                     <FaTimes />
+                  </button>
+               </div>
+            )}
          </div>
       </div>
    );

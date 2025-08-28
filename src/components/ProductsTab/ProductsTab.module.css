@@ -1,11 +1,72 @@
 /* ProductsTab.module.css */
-
 .wrapper {
    display: grid;
    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
    gap: 16px;
    padding: 16px;
    background-color: var(--color-bg);
+}
+
+.mainContainer {
+   display: flex;
+   gap: 20px;
+   align-items: flex-start;
+   flex-wrap: nowrap;
+   height: calc(100vh - 140px);
+}
+
+.filtersColumn {
+   flex: 0 0 320px;
+   background-color: #1f1f1f;
+   border-radius: 8px;
+   padding: 16px;
+   overflow-y: auto;
+   height: 100%;
+}
+
+/* Для вкладки filter: карточки чуть больше и рядом */
+.filterProductsColumn {
+   flex: 1;
+   display: grid;
+   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+   /* чуть больше карточки */
+   gap: 20px;
+   overflow-y: auto;
+   height: 100%;
+   padding-right: 8px;
+   /* чтобы скролл не наезжал на карточки */
+}
+
+/* Сохраняем скролл */
+.filterProductsColumn::-webkit-scrollbar {
+   width: 6px;
+}
+
+.filterProductsColumn::-webkit-scrollbar-thumb {
+   background-color: #555;
+   border-radius: 3px;
+}
+
+.productsColumn {
+   flex: 1;
+   display: grid;
+   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+   gap: 16px;
+   overflow-y: auto;
+   height: 100%;
+   /* растягиваем по родителю */
+}
+
+/* Стили для плавного скролла */
+.filtersColumn::-webkit-scrollbar,
+.productsColumn::-webkit-scrollbar {
+   width: 6px;
+}
+
+.filtersColumn::-webkit-scrollbar-thumb,
+.productsColumn::-webkit-scrollbar-thumb {
+   background-color: #555;
+   border-radius: 3px;
 }
 
 /* Карточка продукта (если нужно внутри использовать) */
@@ -178,6 +239,20 @@
    transition: transform 0.3s ease;
 }
 
+.filterNotice {
+   width: 100%;
+   background: linear-gradient(135deg, #333, #222);
+   color: #ffd166;
+   padding: 10px 14px;
+   border-radius: 8px;
+   font-size: 0.95rem;
+   font-weight: 500;
+   text-align: center;
+   margin-bottom: 12px;
+   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+   letter-spacing: 0.3px;
+}
+
 .categorySubtitle {
    margin-top: 24px;
    font-size: 1rem;
@@ -196,5 +271,23 @@
 
    .card {
       padding: 10px;
+   }
+}
+
+@media (max-width: 768px) {
+   .mainContainer {
+      flex-direction: column;
+      max-height: none;
+   }
+
+   .filtersColumn,
+   .productsColumn {
+      width: 100%;
+      max-height: none;
+      overflow-y: visible;
+   }
+
+   .productsColumn {
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
    }
 }
